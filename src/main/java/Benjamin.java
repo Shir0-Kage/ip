@@ -1,6 +1,14 @@
 import java.util.Scanner;
 
+/**
+ * Runs the Benjamin chatbot and manages its in-memory task list.
+ */
 public class Benjamin {
+    /**
+     * Starts the chatbot's command loop.
+     *
+     * @param args command-line arguments, which are not used
+     */
     public static void main(String[] args) {
         String banner = " ____             _                 _\n"
                 + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -11,46 +19,74 @@ public class Benjamin {
         String greeting = "Hello! I'm Benjamin.\n"
                 + "What can I do for you?\n";
 
-        String divider = "————————————————————————————————————————————————————————————\n";
-        
-        String[] list_of_inputs = new String[100];
-        int size = 0; 
+        String divider = "____________________________________________________________";
 
-        Scanner scanner = new Scanner(System.in); 
+        Task[] tasks = new Task[100];
+        int taskCount = 0;
+
+        Scanner scanner = new Scanner(System.in);
 
         System.out.println(banner + greeting + divider);
 
-        String input = scanner.nextLine(); 
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
 
-        while (!input.equals("bye")) {
-
-            switch (input) {
-                case "list": 
-                    System.out.println(divider);
-                    for (int i = 0; i < size; i++) {
-                        String list_string = String.format("%d. %s", i + 1, list_of_inputs[i]);
-                        System.out.println(list_string);
-                    }
-                    System.out.println(divider);
-                    break;
-
-                default:
-                    list_of_inputs[size] = input;
-                    size++; 
-                    System.out.println("added: " + input + "\n");
-                    break;
+            if (input.equals("bye")) {
+                break;
             }
 
-            System.out.println(divider + input + "\n" + divider);
+            System.out.println(divider);
 
-            input = scanner.nextLine(); 
+            if (input.equals("list")) {
+                System.out.println("Here are the tasks in your list:");
+                for (int i = 0; i < taskCount; i++) {
+                    System.out.printf("%d.%s%n", i + 1, tasks[i]);
+                }
+            } else if (input.equals("mark") || input.startsWith("mark ")) {
+                try {
+                    int taskNumber = Integer.parseInt(input.substring(4).trim());
+                    int taskIndex = taskNumber - 1;
+
+                    if (taskIndex < 0 || taskIndex >= taskCount) {
+                        System.out.println("Please enter a valid task number.");
+                    } else {
+                        tasks[taskIndex].markAsDone();
+                        System.out.println("Nice! I've marked this task as done:");
+                        System.out.println("  " + tasks[taskIndex]);
+                    }
+                } catch (NumberFormatException exception) {
+                    System.out.println("Please enter a valid task number.");
+                }
+            } else if (input.equals("unmark") || input.startsWith("unmark ")) {
+                try {
+                    int taskNumber = Integer.parseInt(input.substring(6).trim());
+                    int taskIndex = taskNumber - 1;
+
+                    if (taskIndex < 0 || taskIndex >= taskCount) {
+                        System.out.println("Please enter a valid task number.");
+                    } else {
+                        tasks[taskIndex].markAsNotDone();
+                        System.out.println("OK, I've marked this task as not done yet:");
+                        System.out.println("  " + tasks[taskIndex]);
+                    }
+                } catch (NumberFormatException exception) {
+                    System.out.println("Please enter a valid task number.");
+                }
+            } else {
+                tasks[taskCount] = new Task(input);
+                taskCount++;
+                System.out.println("added: " + input);
+            }
+
+            System.out.println(divider);
         }
 
         String farewell = "Bye. Hope to see you again soon!";
-
+        System.out.println(divider);
         System.out.println(farewell);
+        System.out.println(divider);
 
-        scanner.close(); 
+        scanner.close();
 
     }
 }
