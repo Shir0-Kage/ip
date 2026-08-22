@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Benjamin {
@@ -13,8 +14,7 @@ public class Benjamin {
 
         String divider = "____________________________________________________________";
 
-        Task[] tasks = new Task[100];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -32,22 +32,28 @@ public class Benjamin {
             try {
                 if (input.equals("list")) {
                     System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.printf("%d.%s%n", i + 1, tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.printf("%d.%s%n", i + 1, tasks.get(i));
                     }
                 } else if (input.equals("mark") || input.startsWith("mark ")) {
-                    int taskIndex = parseTaskIndex(input, "mark", taskCount);
-                    tasks[taskIndex].markAsDone();
+                    int taskIndex = parseTaskIndex(input, "mark", tasks.size());
+                    tasks.get(taskIndex).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  " + tasks[taskIndex]);
+                    System.out.println("  " + tasks.get(taskIndex));
                 } else if (input.equals("unmark") || input.startsWith("unmark ")) {
-                    int taskIndex = parseTaskIndex(input, "unmark", taskCount);
-                    tasks[taskIndex].markAsNotDone();
+                    int taskIndex = parseTaskIndex(input, "unmark", tasks.size());
+                    tasks.get(taskIndex).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  " + tasks[taskIndex]);
+                    System.out.println("  " + tasks.get(taskIndex));
+                } else if (input.equals("delete") || input.startsWith("delete ")) {
+                    int taskIndex = parseTaskIndex(input, "delete", tasks.size());
+                    Task removedTask = tasks.remove(taskIndex);
+                    System.out.println("Noted. I've removed this task:");
+                    System.out.println("  " + removedTask);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                 } else {
                     Task task = parseTask(input);
-                    taskCount = addTask(tasks, taskCount, task);
+                    addTask(tasks, task);
                 }
             } catch (BenjaminException exception) {
                 System.out.println("OOPS!!! " + exception.getMessage());
@@ -154,18 +160,11 @@ public class Benjamin {
         return taskNumber - 1;
     }
 
-    private static int addTask(Task[] tasks, int taskCount, Task task) throws BenjaminException {
-        if (taskCount >= tasks.length) {
-            throw new BenjaminException("The task list is full.");
-        }
-
-        tasks[taskCount] = task;
-        int updatedTaskCount = taskCount + 1;
+    private static void addTask(ArrayList<Task> tasks, Task task) {
+        tasks.add(task);
 
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
-        System.out.println("Now you have " + updatedTaskCount + " tasks in the list.");
-
-        return updatedTaskCount;
+        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
     }
 }
