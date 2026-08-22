@@ -21,39 +21,52 @@ public class Benjamin {
         System.out.println(banner + greeting + divider);
 
         while (scanner.hasNextLine()) {
-            String input = scanner.nextLine();
+            String input = scanner.nextLine().trim();
+            Command command = Command.from(input);
 
-            if (input.equals("bye")) {
+            if (command == Command.BYE) {
                 break;
             }
 
             System.out.println(divider);
 
             try {
-                if (input.equals("list")) {
+                switch (command) {
+                case LIST:
                     System.out.println("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.printf("%d.%s%n", i + 1, tasks.get(i));
                     }
-                } else if (input.equals("mark") || input.startsWith("mark ")) {
+                    break;
+                case MARK:
                     int taskIndex = parseTaskIndex(input, "mark", tasks.size());
                     tasks.get(taskIndex).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(taskIndex));
-                } else if (input.equals("unmark") || input.startsWith("unmark ")) {
-                    int taskIndex = parseTaskIndex(input, "unmark", tasks.size());
-                    tasks.get(taskIndex).markAsNotDone();
+                    break;
+                case UNMARK:
+                    int unmarkTaskIndex = parseTaskIndex(input, "unmark", tasks.size());
+                    tasks.get(unmarkTaskIndex).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  " + tasks.get(taskIndex));
-                } else if (input.equals("delete") || input.startsWith("delete ")) {
-                    int taskIndex = parseTaskIndex(input, "delete", tasks.size());
-                    Task removedTask = tasks.remove(taskIndex);
+                    System.out.println("  " + tasks.get(unmarkTaskIndex));
+                    break;
+                case DELETE:
+                    int deleteTaskIndex = parseTaskIndex(input, "delete", tasks.size());
+                    Task removedTask = tasks.remove(deleteTaskIndex);
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removedTask);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-                } else {
-                    Task task = parseTask(input);
+                    break;
+                case TODO:
+                case DEADLINE:
+                case EVENT:
+                    Task task = parseTask(input, command);
                     addTask(tasks, task);
+                    break;
+                case UNKNOWN:
+                    throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
+                case BYE:
+                    break;
                 }
             } catch (BenjaminException exception) {
                 System.out.println("OOPS!!! " + exception.getMessage());
@@ -70,8 +83,8 @@ public class Benjamin {
         scanner.close();
     }
 
-    private static Task parseTask(String input) throws BenjaminException {
-        if (input.equals("todo") || input.startsWith("todo ")) {
+    private static Task parseTask(String input, Command command) throws BenjaminException {
+        if (command == Command.TODO) {
             String description = input.substring(4).trim();
 
             if (description.isEmpty()) {
@@ -81,7 +94,7 @@ public class Benjamin {
             return new Todo(description);
         }
 
-        if (input.equals("deadline") || input.startsWith("deadline ")) {
+        if (command == Command.DEADLINE) {
             String arguments = input.substring(8).trim();
             int byIndex = arguments.indexOf("/by");
 
@@ -102,7 +115,7 @@ public class Benjamin {
             return new Deadline(description, by);
         }
 
-        if (input.equals("event") || input.startsWith("event ")) {
+        if (command == Command.EVENT) {
             String arguments = input.substring(5).trim();
             int fromIndex = arguments.indexOf("/from");
 
