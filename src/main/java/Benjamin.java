@@ -13,14 +13,33 @@ public class Benjamin {
 
         String divider = "————————————————————————————————————————————————————————————\n";
         
+        String[] list_of_inputs = new String[100];
+        int size = 0; 
 
         Scanner scanner = new Scanner(System.in); 
 
-        System.out.println(banner + greeting + "\n");
+        System.out.println(banner + greeting + divider);
 
         String input = scanner.nextLine(); 
 
-        while (input != "bye") {
+        while (!input.equals("bye")) {
+
+            switch (input) {
+                case "list": 
+                    System.out.println(divider);
+                    for (int i = 0; i < size; i++) {
+                        String list_string = String.format("%d. %s", i + 1, list_of_inputs[i]);
+                        System.out.println(list_string);
+                    }
+                    System.out.println(divider);
+                    break;
+
+                default:
+                    list_of_inputs[size] = input;
+                    size++; 
+                    System.out.println("added: " + input + "\n");
+                    break;
+            }
 
             System.out.println(divider + input + "\n" + divider);
 
