@@ -1,14 +1,6 @@
 import java.util.Scanner;
 
-/**
- * Runs the Benjamin chatbot and manages its in-memory task list.
- */
 public class Benjamin {
-    /**
-     * Starts the chatbot's command loop.
-     *
-     * @param args command-line arguments, which are not used
-     */
     public static void main(String[] args) {
         String banner = " ____             _                 _\n"
                 + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -72,10 +64,49 @@ public class Benjamin {
                 } catch (NumberFormatException exception) {
                     System.out.println("Please enter a valid task number.");
                 }
+            } else if (input.equals("todo") || input.startsWith("todo ")) {
+                String description = input.substring(4).trim();
+                if (description.isEmpty()) {
+                    System.out.println("Please enter a task description after todo.");
+                } else {
+                    taskCount = addTask(tasks, taskCount, new Todo(description));
+                }
+            } else if (input.equals("deadline") || input.startsWith("deadline ")) {
+                String arguments = input.substring(8).trim();
+                int byIndex = arguments.indexOf(" /by ");
+
+                if (byIndex < 0) {
+                    System.out.println("Please use: deadline <description> /by <date/time>");
+                } else {
+                    String description = arguments.substring(0, byIndex).trim();
+                    String by = arguments.substring(byIndex + 5).trim();
+
+                    if (description.isEmpty() || by.isEmpty()) {
+                        System.out.println("Please use: deadline <description> /by <date/time>");
+                    } else {
+                        taskCount = addTask(tasks, taskCount, new Deadline(description, by));
+                    }
+                }
+            } else if (input.equals("event") || input.startsWith("event ")) {
+                String arguments = input.substring(5).trim();
+                int fromIndex = arguments.indexOf(" /from ");
+                int toIndex = arguments.indexOf(" /to ", fromIndex + 7);
+
+                if (fromIndex < 0 || toIndex < 0) {
+                    System.out.println("Please use: event <description> /from <date/time> /to <date/time>");
+                } else {
+                    String description = arguments.substring(0, fromIndex).trim();
+                    String from = arguments.substring(fromIndex + 7, toIndex).trim();
+                    String to = arguments.substring(toIndex + 5).trim();
+
+                    if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                        System.out.println("Please use: event <description> /from <date/time> /to <date/time>");
+                    } else {
+                        taskCount = addTask(tasks, taskCount, new Event(description, from, to));
+                    }
+                }
             } else {
-                tasks[taskCount] = new Task(input);
-                taskCount++;
-                System.out.println("added: " + input);
+                System.out.println("Please enter a valid command.");
             }
 
             System.out.println(divider);
@@ -87,6 +118,16 @@ public class Benjamin {
         System.out.println(divider);
 
         scanner.close();
+    }
 
+    private static int addTask(Task[] tasks, int taskCount, Task task) {
+        tasks[taskCount] = task;
+        int updatedTaskCount = taskCount + 1;
+
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        System.out.println("Now you have " + updatedTaskCount + " tasks in the list.");
+
+        return updatedTaskCount;
     }
 }
