@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -43,6 +44,30 @@ public class Benjamin {
                     System.out.println("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.printf("%d.%s%n", i + 1, tasks.get(i));
+                    }
+                    break;
+                case ON:
+                    String dateText = input.substring(2).trim();
+
+                    if (dateText.isEmpty()) {
+                        throw new BenjaminException("Please provide a date after on.");
+                    }
+
+                    LocalDate queryDate = TaskDateTime.parse(dateText).getDate();
+                    int matchCount = 0;
+
+                    System.out.println("Here are the tasks on "
+                            + TaskDateTime.formatDate(queryDate) + ":");
+
+                    for (Task candidate : tasks) {
+                        if (candidate.occursOn(queryDate)) {
+                            matchCount++;
+                            System.out.printf("%d.%s%n", matchCount, candidate);
+                        }
+                    }
+
+                    if (matchCount == 0) {
+                        System.out.println("There is nothing on that date.");
                     }
                     break;
                 case MARK:
@@ -163,13 +188,14 @@ public class Benjamin {
             break;
         case "D":
             requireFieldCount(parts, 4);
-            task = new Deadline(description, requireNonBlank(parts[3], "the /by field"));
+            task = new Deadline(description,
+                    TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
             break;
         case "E":
             requireFieldCount(parts, 5);
             task = new Event(description,
-                    requireNonBlank(parts[3], "the /from field"),
-                    requireNonBlank(parts[4], "the /to field"));
+                    TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
+                    TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
             break;
         default:
             throw new BenjaminException("\"" + type + "\" is not a known task type.");
@@ -247,7 +273,7 @@ public class Benjamin {
                 throw new BenjaminException("The /by date or time of a deadline cannot be empty.");
             }
 
-            return new Deadline(description, by);
+            return new Deadline(description, TaskDateTime.parse(by));
         }
 
         if (command == Command.EVENT) {
@@ -278,7 +304,7 @@ public class Benjamin {
                 throw new BenjaminException("The /to date or time of an event cannot be empty.");
             }
 
-            return new Event(description, from, to);
+            return new Event(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
         }
 
         throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
