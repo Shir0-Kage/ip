@@ -58,7 +58,7 @@ public class Ui {
         showError("I could not read your saved tasks, so I am starting empty.");
     }
 
-    public void showTaskList(List<Task> tasks) {
+    public void showTaskList(TaskList tasks) {
         System.out.println("Here are the tasks in your list:");
 
         for (int i = 0; i < tasks.size(); i++) {

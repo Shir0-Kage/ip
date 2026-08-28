@@ -12,7 +12,7 @@ public class Benjamin {
     private static final Ui ui = new Ui();
 
     public static void main(String[] args) {
-        ArrayList<Task> tasks = load();
+        TaskList tasks = new TaskList(load());
 
         ui.showWelcome();
 
@@ -39,7 +39,7 @@ public class Benjamin {
                     }
 
                     LocalDate queryDate = TaskDateTime.parse(dateText).getDate();
-                    ui.showTasksOn(queryDate, findTasksOn(tasks, queryDate));
+                    ui.showTasksOn(queryDate, tasks.findOn(queryDate));
                     break;
                 case MARK:
                     int taskIndex = parseTaskIndex(input, "mark", tasks.size());
@@ -81,19 +81,6 @@ public class Benjamin {
 
         ui.showGoodbye();
         ui.close();
-    }
-
-    /** Returns the tasks that fall on the given date, in list order. */
-    private static ArrayList<Task> findTasksOn(ArrayList<Task> tasks, LocalDate date) {
-        ArrayList<Task> matches = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.occursOn(date)) {
-                matches.add(task);
-            }
-        }
-
-        return matches;
     }
 
     /**
@@ -205,16 +192,10 @@ public class Benjamin {
      * Writes the whole task list to the save file, creating the data folder
      * first if it is not there yet.
      */
-    private static void save(ArrayList<Task> tasks) {
+    private static void save(TaskList tasks) {
         try {
             Files.createDirectories(DATA_FILE.getParent());
-
-            ArrayList<String> lines = new ArrayList<>();
-            for (Task task : tasks) {
-                lines.add(task.toSaveFormat());
-            }
-
-            Files.write(DATA_FILE, lines);
+            Files.write(DATA_FILE, tasks.toSaveFormat());
         } catch (IOException exception) {
             ui.showError("I could not save your tasks.");
         }
