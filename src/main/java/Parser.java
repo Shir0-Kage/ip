@@ -7,9 +7,38 @@ import java.time.LocalDate;
  * can use, and reports a clear problem when the text does not make sense.
  */
 public class Parser {
-    /** Returns the kind of command the input asks for. */
-    public static CommandType parseCommandType(String input) {
-        return CommandType.from(input);
+    /**
+     * Returns the command described by a line of user input.
+     *
+     * <p>Only the wording is checked here. Anything that depends on the tasks
+     * currently in the list, such as whether a task number exists, is checked
+     * when the command runs.
+     *
+     * @throws BenjaminException if the line cannot be understood.
+     */
+    public static Command parse(String input) throws BenjaminException {
+        CommandType commandType = CommandType.from(input);
+
+        switch (commandType) {
+        case BYE:
+            return new ExitCommand();
+        case LIST:
+            return new ListCommand();
+        case ON:
+            return new OnCommand(parseDate(input));
+        case MARK:
+            return new MarkCommand(parseTaskNumber(input, "mark"));
+        case UNMARK:
+            return new UnmarkCommand(parseTaskNumber(input, "unmark"));
+        case DELETE:
+            return new DeleteCommand(parseTaskNumber(input, "delete"));
+        case TODO:
+        case DEADLINE:
+        case EVENT:
+            return new AddCommand(parseTask(input, commandType));
+        default:
+            throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
+        }
     }
 
     /**
@@ -86,37 +115,25 @@ public class Parser {
     }
 
     /**
-     * Returns the zero based index named by a command such as {@code mark 2}.
+     * Returns the one based task number named by a command such as {@code mark 2}.
      *
      * @param keyword the command word, used both to find the number and to
      *     word any problem message.
-     * @param taskCount how many tasks there are, so the number can be checked.
-     * @throws BenjaminException if the number is missing, not a number, or out of range.
+     * @throws BenjaminException if the number is missing or is not a whole number.
      */
-    public static int parseTaskIndex(String input, String keyword, int taskCount)
-            throws BenjaminException {
+    public static int parseTaskNumber(String input, String keyword) throws BenjaminException {
         String taskNumberText = input.substring(keyword.length()).trim();
 
         if (taskNumberText.isEmpty()) {
             throw new BenjaminException("Please provide a task number after " + keyword + ".");
         }
 
-        int taskNumber;
         try {
-            taskNumber = Integer.parseInt(taskNumberText);
+            return Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
             throw new BenjaminException("The task number after " + keyword
                     + " must be a whole number.");
         }
-
-        if (taskCount == 0) {
-            throw new BenjaminException("There are no tasks to " + keyword + ".");
-        }
-        if (taskNumber < 1 || taskNumber > taskCount) {
-            throw new BenjaminException("Choose a task number between 1 and " + taskCount + ".");
-        }
-
-        return taskNumber - 1;
     }
 
     /**

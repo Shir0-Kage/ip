@@ -44,10 +44,9 @@ public class Ui {
         System.out.println(BANNER + "Hello! I'm Benjamin.\nWhat can I do for you?\n" + DIVIDER);
     }
 
-    public void showGoodbye() {
-        showLine();
+    /** Prints the sign off line. The surrounding dividers are printed by the caller. */
+    public void showFarewell() {
         System.out.println("Bye. Hope to see you again soon!");
-        showLine();
     }
 
     public void showError(String message) {

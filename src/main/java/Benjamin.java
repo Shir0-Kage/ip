@@ -1,11 +1,25 @@
-import java.time.LocalDate;
-
+/**
+ * A chatbot that keeps a list of todos, deadlines and events.
+ *
+ * <p>This class only wires the parts together. Reading and printing belongs to
+ * {@link Ui}, understanding input to {@link Parser}, the tasks themselves to
+ * {@link TaskList}, and the save file to {@link Storage}.
+ */
 public class Benjamin {
-    private static final Ui ui = new Ui();
-    private static final Storage storage = new Storage("data", "benjamin.txt");
+    private final Ui ui;
+    private final Storage storage;
+    private TaskList tasks;
 
-    public static void main(String[] args) {
-        TaskList tasks;
+    /**
+     * Creates a chatbot that saves to the given path, and loads whatever has
+     * been saved there before.
+     *
+     * @param first the first part of the save path, such as {@code data}.
+     * @param more the remaining parts, such as {@code benjamin.txt}.
+     */
+    public Benjamin(String first, String... more) {
+        ui = new Ui();
+        storage = new Storage(first, more);
 
         try {
             tasks = new TaskList(storage.load());
@@ -17,76 +31,40 @@ public class Benjamin {
             ui.showLoadingError();
             tasks = new TaskList();
         }
+    }
 
+    /** Greets the user, then handles commands until there are none left. */
+    public void run() {
         ui.showWelcome();
 
-        while (ui.hasNextCommand()) {
-            String input = ui.readCommand();
-            CommandType commandType = Parser.parseCommandType(input);
+        boolean isExit = false;
 
-            if (commandType == CommandType.BYE) {
-                break;
-            }
-
-            ui.showLine();
-
+        while (!isExit && ui.hasNextCommand()) {
             try {
-                switch (commandType) {
-                case LIST:
-                    ui.showTaskList(tasks);
-                    break;
-                case ON:
-                    LocalDate queryDate = Parser.parseDate(input);
-                    ui.showTasksOn(queryDate, tasks.findOn(queryDate));
-                    break;
-                case MARK:
-                    int taskIndex = Parser.parseTaskIndex(input, "mark", tasks.size());
-                    tasks.get(taskIndex).markAsDone();
-                    ui.showMarked(tasks.get(taskIndex));
-                    save(tasks);
-                    break;
-                case UNMARK:
-                    int unmarkTaskIndex = Parser.parseTaskIndex(input, "unmark", tasks.size());
-                    tasks.get(unmarkTaskIndex).markAsNotDone();
-                    ui.showUnmarked(tasks.get(unmarkTaskIndex));
-                    save(tasks);
-                    break;
-                case DELETE:
-                    int deleteTaskIndex = Parser.parseTaskIndex(input, "delete", tasks.size());
-                    Task removedTask = tasks.remove(deleteTaskIndex);
-                    ui.showRemoved(removedTask, tasks.size());
-                    save(tasks);
-                    break;
-                case TODO:
-                case DEADLINE:
-                case EVENT:
-                    Task task = Parser.parseTask(input, commandType);
-                    tasks.add(task);
-                    ui.showAdded(task, tasks.size());
-                    save(tasks);
-                    break;
-                case UNKNOWN:
-                    throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
-                case BYE:
-                    break;
-                }
+                String fullCommand = ui.readCommand();
+                ui.showLine();
+
+                Command command = Parser.parse(fullCommand);
+                command.execute(tasks, ui, storage);
+                isExit = command.isExit();
             } catch (BenjaminException exception) {
                 ui.showError(exception.getMessage());
+            } finally {
+                ui.showLine();
             }
+        }
 
+        if (!isExit) {
+            // The input ended without a bye command, so sign off anyway.
+            ui.showLine();
+            ui.showFarewell();
             ui.showLine();
         }
 
-        ui.showGoodbye();
         ui.close();
     }
 
-    /** Writes the tasks to disk, reporting the problem if that is not possible. */
-    private static void save(TaskList tasks) {
-        try {
-            storage.save(tasks);
-        } catch (BenjaminException exception) {
-            ui.showError(exception.getMessage());
-        }
+    public static void main(String[] args) {
+        new Benjamin("data", "benjamin.txt").run();
     }
 }
