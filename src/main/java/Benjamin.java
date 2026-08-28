@@ -96,7 +96,9 @@ public class Benjamin {
 
     /**
      * Reads the saved task list. A missing file simply means there is
-     * nothing saved yet, so an empty list is returned.
+     * nothing saved yet, so an empty list is returned. Lines that are not in
+     * the expected format are reported and skipped, so one bad line does not
+     * cost the user the rest of the list.
      */
     private static ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -106,36 +108,95 @@ public class Benjamin {
         }
 
         try {
+            int lineNumber = 0;
+
             for (String line : Files.readAllLines(DATA_FILE)) {
-                tasks.add(parseSavedTask(line));
+                lineNumber++;
+
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                try {
+                    tasks.add(parseSavedTask(line));
+                } catch (BenjaminException exception) {
+                    System.out.println("OOPS!!! Skipping line " + lineNumber
+                            + " of the save file because " + exception.getMessage());
+                }
             }
         } catch (IOException exception) {
-            System.out.println("OOPS!!! I could not read your saved tasks.");
+            System.out.println("OOPS!!! I could not read your saved tasks, so I am starting empty.");
+            return new ArrayList<>();
         }
 
         return tasks;
     }
 
-    /** Rebuilds a task from one line of the save file. */
-    private static Task parseSavedTask(String line) {
-        String[] parts = line.split(" \\| ");
-        String type = parts[0];
-        String description = parts[2];
+    /**
+     * Rebuilds a task from one line of the save file.
+     *
+     * @throws BenjaminException if the line is not in the expected format.
+     */
+    private static Task parseSavedTask(String line) throws BenjaminException {
+        String[] parts = line.split(" \\| ", -1);
 
-        Task task;
-        if (type.equals("D")) {
-            task = new Deadline(description, parts[3]);
-        } else if (type.equals("E")) {
-            task = new Event(description, parts[3], parts[4]);
-        } else {
-            task = new Todo(description);
+        if (parts.length < 3) {
+            throw new BenjaminException("it does not have enough fields.");
         }
 
-        if (parts[1].equals("1")) {
+        String type = parts[0].trim();
+        String doneFlag = parts[1].trim();
+        String description = parts[2].trim();
+
+        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
+            throw new BenjaminException("the done marker should be 0 or 1.");
+        }
+        if (description.isEmpty()) {
+            throw new BenjaminException("the description is empty.");
+        }
+
+        Task task;
+        switch (type) {
+        case "T":
+            requireFieldCount(parts, 3);
+            task = new Todo(description);
+            break;
+        case "D":
+            requireFieldCount(parts, 4);
+            task = new Deadline(description, requireNonBlank(parts[3], "the /by field"));
+            break;
+        case "E":
+            requireFieldCount(parts, 5);
+            task = new Event(description,
+                    requireNonBlank(parts[3], "the /from field"),
+                    requireNonBlank(parts[4], "the /to field"));
+            break;
+        default:
+            throw new BenjaminException("\"" + type + "\" is not a known task type.");
+        }
+
+        if (doneFlag.equals("1")) {
             task.markAsDone();
         }
 
         return task;
+    }
+
+    private static void requireFieldCount(String[] parts, int expected) throws BenjaminException {
+        if (parts.length != expected) {
+            throw new BenjaminException("type " + parts[0].trim() + " needs exactly "
+                    + expected + " fields but has " + parts.length + ".");
+        }
+    }
+
+    private static String requireNonBlank(String value, String fieldName) throws BenjaminException {
+        String trimmed = value.trim();
+
+        if (trimmed.isEmpty()) {
+            throw new BenjaminException(fieldName + " is empty.");
+        }
+
+        return trimmed;
     }
 
     /**
