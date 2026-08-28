@@ -4,47 +4,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Benjamin {
     /** Where the task list is kept between runs, relative to the project root. */
     private static final Path DATA_FILE = Paths.get("data", "benjamin.txt");
 
+    private static final Ui ui = new Ui();
+
     public static void main(String[] args) {
-        String banner = " ____             _                 _\n"
-                + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
-                + "|  _ \\ / _ \\ '_ \\| |/ _` | '_ ` _ \\| | '_ \\\n"
-                + "| |_) |  __/ | | | | (_| | | | | | | | | | |\n"
-                + "|____/ \\___|_| |_|/ |\\__,_|_| |_| |_|_|_| |_|\n"
-                + "                |__/\n";
-        String greeting = "Hello! I'm Benjamin.\n"
-                + "What can I do for you?\n";
-
-        String divider = "____________________________________________________________";
-
         ArrayList<Task> tasks = load();
 
-        Scanner scanner = new Scanner(System.in);
+        ui.showWelcome();
 
-        System.out.println(banner + greeting + divider);
-
-        while (scanner.hasNextLine()) {
-            String input = scanner.nextLine().trim();
+        while (ui.hasNextCommand()) {
+            String input = ui.readCommand();
             Command command = Command.from(input);
 
             if (command == Command.BYE) {
                 break;
             }
 
-            System.out.println(divider);
+            ui.showLine();
 
             try {
                 switch (command) {
                 case LIST:
-                    System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.printf("%d.%s%n", i + 1, tasks.get(i));
-                    }
+                    ui.showTaskList(tasks);
                     break;
                 case ON:
                     String dateText = input.substring(2).trim();
@@ -54,49 +39,32 @@ public class Benjamin {
                     }
 
                     LocalDate queryDate = TaskDateTime.parse(dateText).getDate();
-                    int matchCount = 0;
-
-                    System.out.println("Here are the tasks on "
-                            + TaskDateTime.formatDate(queryDate) + ":");
-
-                    for (Task candidate : tasks) {
-                        if (candidate.occursOn(queryDate)) {
-                            matchCount++;
-                            System.out.printf("%d.%s%n", matchCount, candidate);
-                        }
-                    }
-
-                    if (matchCount == 0) {
-                        System.out.println("There is nothing on that date.");
-                    }
+                    ui.showTasksOn(queryDate, findTasksOn(tasks, queryDate));
                     break;
                 case MARK:
                     int taskIndex = parseTaskIndex(input, "mark", tasks.size());
                     tasks.get(taskIndex).markAsDone();
-                    System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  " + tasks.get(taskIndex));
+                    ui.showMarked(tasks.get(taskIndex));
                     save(tasks);
                     break;
                 case UNMARK:
                     int unmarkTaskIndex = parseTaskIndex(input, "unmark", tasks.size());
                     tasks.get(unmarkTaskIndex).markAsNotDone();
-                    System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  " + tasks.get(unmarkTaskIndex));
+                    ui.showUnmarked(tasks.get(unmarkTaskIndex));
                     save(tasks);
                     break;
                 case DELETE:
                     int deleteTaskIndex = parseTaskIndex(input, "delete", tasks.size());
                     Task removedTask = tasks.remove(deleteTaskIndex);
-                    System.out.println("Noted. I've removed this task:");
-                    System.out.println("  " + removedTask);
-                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+                    ui.showRemoved(removedTask, tasks.size());
                     save(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
                     Task task = parseTask(input, command);
-                    addTask(tasks, task);
+                    tasks.add(task);
+                    ui.showAdded(task, tasks.size());
                     save(tasks);
                     break;
                 case UNKNOWN:
@@ -105,18 +73,27 @@ public class Benjamin {
                     break;
                 }
             } catch (BenjaminException exception) {
-                System.out.println("OOPS!!! " + exception.getMessage());
+                ui.showError(exception.getMessage());
             }
 
-            System.out.println(divider);
+            ui.showLine();
         }
 
-        String farewell = "Bye. Hope to see you again soon!";
-        System.out.println(divider);
-        System.out.println(farewell);
-        System.out.println(divider);
+        ui.showGoodbye();
+        ui.close();
+    }
 
-        scanner.close();
+    /** Returns the tasks that fall on the given date, in list order. */
+    private static ArrayList<Task> findTasksOn(ArrayList<Task> tasks, LocalDate date) {
+        ArrayList<Task> matches = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.occursOn(date)) {
+                matches.add(task);
+            }
+        }
+
+        return matches;
     }
 
     /**
@@ -145,12 +122,11 @@ public class Benjamin {
                 try {
                     tasks.add(parseSavedTask(line));
                 } catch (BenjaminException exception) {
-                    System.out.println("OOPS!!! Skipping line " + lineNumber
-                            + " of the save file because " + exception.getMessage());
+                    ui.showSkippedLine(lineNumber, exception.getMessage());
                 }
             }
         } catch (IOException exception) {
-            System.out.println("OOPS!!! I could not read your saved tasks, so I am starting empty.");
+            ui.showLoadingError();
             return new ArrayList<>();
         }
 
@@ -240,7 +216,7 @@ public class Benjamin {
 
             Files.write(DATA_FILE, lines);
         } catch (IOException exception) {
-            System.out.println("OOPS!!! I could not save your tasks.");
+            ui.showError("I could not save your tasks.");
         }
     }
 
@@ -332,13 +308,5 @@ public class Benjamin {
         }
 
         return taskNumber - 1;
-    }
-
-    private static void addTask(ArrayList<Task> tasks, Task task) {
-        tasks.add(task);
-
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
     }
 }
