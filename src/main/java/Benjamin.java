@@ -1,7 +1,14 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Benjamin {
+    /** Where the task list is kept between runs, relative to the project root. */
+    private static final Path DATA_FILE = Paths.get("data", "benjamin.txt");
+
     public static void main(String[] args) {
         String banner = " ____             _                 _\n"
                 + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -43,12 +50,14 @@ public class Benjamin {
                     tasks.get(taskIndex).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(taskIndex));
+                    save(tasks);
                     break;
                 case UNMARK:
                     int unmarkTaskIndex = parseTaskIndex(input, "unmark", tasks.size());
                     tasks.get(unmarkTaskIndex).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + tasks.get(unmarkTaskIndex));
+                    save(tasks);
                     break;
                 case DELETE:
                     int deleteTaskIndex = parseTaskIndex(input, "delete", tasks.size());
@@ -56,12 +65,14 @@ public class Benjamin {
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removedTask);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+                    save(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
                     Task task = parseTask(input, command);
                     addTask(tasks, task);
+                    save(tasks);
                     break;
                 case UNKNOWN:
                     throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
@@ -81,6 +92,25 @@ public class Benjamin {
         System.out.println(divider);
 
         scanner.close();
+    }
+
+    /**
+     * Writes the whole task list to the save file, creating the data folder
+     * first if it is not there yet.
+     */
+    private static void save(ArrayList<Task> tasks) {
+        try {
+            Files.createDirectories(DATA_FILE.getParent());
+
+            ArrayList<String> lines = new ArrayList<>();
+            for (Task task : tasks) {
+                lines.add(task.toSaveFormat());
+            }
+
+            Files.write(DATA_FILE, lines);
+        } catch (IOException exception) {
+            System.out.println("OOPS!!! I could not save your tasks.");
+        }
     }
 
     private static Task parseTask(String input, Command command) throws BenjaminException {
