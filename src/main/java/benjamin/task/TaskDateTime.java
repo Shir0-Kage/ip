@@ -60,7 +60,7 @@ public class TaskDateTime {
             try {
                 return new TaskDateTime(LocalDateTime.parse(trimmed, format), true);
             } catch (DateTimeParseException exception) {
-                continue;
+                // This format did not match, so fall through and try the next one.
             }
         }
 
@@ -68,7 +68,7 @@ public class TaskDateTime {
             try {
                 return new TaskDateTime(LocalDate.parse(trimmed, format).atStartOfDay(), false);
             } catch (DateTimeParseException exception) {
-                continue;
+                // This format did not match, so fall through and try the next one.
             }
         }
 
