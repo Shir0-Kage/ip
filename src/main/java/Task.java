@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 public class Task {
     protected String description;
     protected boolean isDone;
@@ -17,6 +19,14 @@ public class Task {
 
     public void markAsNotDone() {
         isDone = false;
+    }
+
+    /**
+     * Returns true if this task falls on the given date. Plain tasks carry no
+     * date, so they never do; dated task types override this.
+     */
+    public boolean occursOn(LocalDate date) {
+        return false;
     }
 
     /**

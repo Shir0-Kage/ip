@@ -163,13 +163,14 @@ public class Benjamin {
             break;
         case "D":
             requireFieldCount(parts, 4);
-            task = new Deadline(description, requireNonBlank(parts[3], "the /by field"));
+            task = new Deadline(description,
+                    TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
             break;
         case "E":
             requireFieldCount(parts, 5);
             task = new Event(description,
-                    requireNonBlank(parts[3], "the /from field"),
-                    requireNonBlank(parts[4], "the /to field"));
+                    TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
+                    TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
             break;
         default:
             throw new BenjaminException("\"" + type + "\" is not a known task type.");
@@ -247,7 +248,7 @@ public class Benjamin {
                 throw new BenjaminException("The /by date or time of a deadline cannot be empty.");
             }
 
-            return new Deadline(description, by);
+            return new Deadline(description, TaskDateTime.parse(by));
         }
 
         if (command == Command.EVENT) {
@@ -278,7 +279,7 @@ public class Benjamin {
                 throw new BenjaminException("The /to date or time of an event cannot be empty.");
             }
 
-            return new Event(description, from, to);
+            return new Event(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
         }
 
         throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
