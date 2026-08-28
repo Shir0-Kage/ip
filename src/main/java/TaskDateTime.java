@@ -77,6 +77,11 @@ public class TaskDateTime {
         return dateTime.toLocalDate();
     }
 
+    /** Returns the display form of a plain calendar date, such as Oct 15 2019. */
+    public static String formatDate(LocalDate date) {
+        return date.format(DISPLAY_DATE);
+    }
+
     /** Returns the form written to the save file, which parse() can read back. */
     public String toStorageString() {
         return hasTime ? dateTime.format(STORAGE_DATE_TIME) : dateTime.format(STORAGE_DATE);

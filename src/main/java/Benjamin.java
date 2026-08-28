@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -43,6 +44,30 @@ public class Benjamin {
                     System.out.println("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.printf("%d.%s%n", i + 1, tasks.get(i));
+                    }
+                    break;
+                case ON:
+                    String dateText = input.substring(2).trim();
+
+                    if (dateText.isEmpty()) {
+                        throw new BenjaminException("Please provide a date after on.");
+                    }
+
+                    LocalDate queryDate = TaskDateTime.parse(dateText).getDate();
+                    int matchCount = 0;
+
+                    System.out.println("Here are the tasks on "
+                            + TaskDateTime.formatDate(queryDate) + ":");
+
+                    for (Task candidate : tasks) {
+                        if (candidate.occursOn(queryDate)) {
+                            matchCount++;
+                            System.out.printf("%d.%s%n", matchCount, candidate);
+                        }
+                    }
+
+                    if (matchCount == 0) {
+                        System.out.println("There is nothing on that date.");
                     }
                     break;
                 case MARK:
