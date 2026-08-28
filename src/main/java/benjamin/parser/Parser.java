@@ -7,6 +7,7 @@ import benjamin.command.AddCommand;
 import benjamin.command.Command;
 import benjamin.command.DeleteCommand;
 import benjamin.command.ExitCommand;
+import benjamin.command.FindCommand;
 import benjamin.command.ListCommand;
 import benjamin.command.MarkCommand;
 import benjamin.command.OnCommand;
@@ -30,6 +31,7 @@ public class Parser {
     private static final String KEYWORD_MARK = "mark";
     private static final String KEYWORD_UNMARK = "unmark";
     private static final String KEYWORD_DELETE = "delete";
+    private static final String KEYWORD_FIND = "find";
     private static final String KEYWORD_ON = "on";
 
     private static final String MARKER_BY = "/by";
@@ -56,6 +58,8 @@ public class Parser {
             return new ExitCommand();
         case LIST:
             return new ListCommand();
+        case FIND:
+            return new FindCommand(parseKeyword(input));
         case ON:
             return new OnCommand(parseDate(input));
         case MARK:
@@ -115,6 +119,21 @@ public class Parser {
             throw new BenjaminException("The task number after " + keyword
                     + " must be a whole number.");
         }
+    }
+
+    /**
+     * Returns the text to search for, named by a {@code find} command.
+     *
+     * @throws BenjaminException if no keyword was given.
+     */
+    public static String parseKeyword(String input) throws BenjaminException {
+        String keyword = input.substring(KEYWORD_FIND.length()).trim();
+
+        if (keyword.isEmpty()) {
+            throw new BenjaminException("Please provide a keyword after " + KEYWORD_FIND + ".");
+        }
+
+        return keyword;
     }
 
     /**

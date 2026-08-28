@@ -91,6 +91,36 @@ public class TaskListTest {
     }
 
     @Test
+    public void find_keywordInSeveralTasks_allOfThemFoundInOrder() throws BenjaminException {
+        List<Task> matches = sampleList().find("book");
+
+        assertEquals(2, matches.size());
+        assertEquals("[T][ ] read book", matches.get(0).toString());
+        assertEquals("[D][ ] return book (by: Jun 06 2019)", matches.get(1).toString());
+    }
+
+    @Test
+    public void find_differentCapitalisation_stillFound() throws BenjaminException {
+        assertEquals(2, sampleList().find("BOOK").size());
+        assertEquals(2, sampleList().find("BoOk").size());
+    }
+
+    @Test
+    public void find_partOfAWord_stillFound() throws BenjaminException {
+        assertEquals(1, sampleList().find("meet").size());
+    }
+
+    @Test
+    public void find_keywordInNoTask_emptyListReturned() throws BenjaminException {
+        assertEquals(0, sampleList().find("holiday").size());
+    }
+
+    @Test
+    public void find_emptyList_emptyListReturned() {
+        assertEquals(0, new TaskList().find("book").size());
+    }
+
+    @Test
     public void toSaveFormat_mixedTasks_oneLinePerTaskInOrder() throws BenjaminException {
         TaskList tasks = sampleList();
         tasks.get(0).markAsDone();

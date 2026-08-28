@@ -19,6 +19,9 @@ public enum CommandType {
     /** Show every task in the list. */
     LIST,
 
+    /** Show the tasks whose description contains a given keyword. */
+    FIND,
+
     /** Show the tasks falling on a given date. */
     ON,
 

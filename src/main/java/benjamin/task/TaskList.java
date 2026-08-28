@@ -78,6 +78,24 @@ public class TaskList {
         return matches;
     }
 
+    /**
+     * Returns the tasks whose description contains the given text, in list order.
+     *
+     * @param keyword the text being searched for, matched without regard to case.
+     * @return the matching tasks, which is empty if none match.
+     */
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.hasKeyword(keyword)) {
+                matches.add(task);
+            }
+        }
+
+        return matches;
+    }
+
     /** Returns one save file line per task, in list order. */
     public List<String> toSaveFormat() {
         List<String> lines = new ArrayList<>();
