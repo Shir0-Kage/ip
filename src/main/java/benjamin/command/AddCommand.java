@@ -10,10 +10,20 @@ import benjamin.ui.Ui;
 public class AddCommand extends Command {
     private final Task task;
 
+    /**
+     * Creates a command that will add the given task.
+     *
+     * @param task the task built from what the user typed.
+     */
     public AddCommand(Task task) {
         this.task = task;
     }
 
+    /**
+     * Adds the task, reports it, and saves the longer list.
+     *
+     * @throws BenjaminException if the list cannot be saved.
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws BenjaminException {
         tasks.add(task);

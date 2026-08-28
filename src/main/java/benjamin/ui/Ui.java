@@ -27,6 +27,7 @@ public class Ui {
 
     private final Scanner scanner;
 
+    /** Creates a user interface that reads from standard input. */
     public Ui() {
         this.scanner = new Scanner(System.in);
     }
@@ -46,6 +47,7 @@ public class Ui {
         System.out.println(DIVIDER);
     }
 
+    /** Prints the banner and the opening greeting. */
     public void showWelcome() {
         System.out.println(BANNER + "Hello! I'm Benjamin.\nWhat can I do for you?\n" + DIVIDER);
     }
@@ -55,14 +57,26 @@ public class Ui {
         System.out.println("Bye. Hope to see you again soon!");
     }
 
+    /**
+     * Reports a problem to the user.
+     *
+     * @param message the wording to show, which is prefixed here so that every
+     *     problem looks the same.
+     */
     public void showError(String message) {
         System.out.println("OOPS!!! " + message);
     }
 
+    /** Reports that the save file could not be read at all. */
     public void showLoadingError() {
         showError("I could not read your saved tasks, so I am starting empty.");
     }
 
+    /**
+     * Prints every task, numbered from one.
+     *
+     * @param tasks the list to show.
+     */
     public void showTaskList(TaskList tasks) {
         System.out.println("Here are the tasks in your list:");
 
@@ -71,7 +85,12 @@ public class Ui {
         }
     }
 
-    /** Reports the tasks that fall on the given date, or says there are none. */
+    /**
+     * Reports the tasks that fall on the given date, or says there are none.
+     *
+     * @param date the day that was asked about.
+     * @param matches the tasks falling on that day, possibly empty.
+     */
     public void showTasksOn(LocalDate date, List<Task> matches) {
         System.out.println("Here are the tasks on " + TaskDateTime.formatDate(date) + ":");
 
@@ -85,28 +104,51 @@ public class Ui {
         }
     }
 
+    /**
+     * Confirms that a task was added.
+     *
+     * @param task the task just added.
+     * @param taskCount how many tasks there are now.
+     */
     public void showAdded(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
         showTaskCount(taskCount);
     }
 
+    /**
+     * Confirms that a task was removed.
+     *
+     * @param task the task just removed.
+     * @param taskCount how many tasks are left.
+     */
     public void showRemoved(Task task, int taskCount) {
         System.out.println("Noted. I've removed this task:");
         System.out.println("  " + task);
         showTaskCount(taskCount);
     }
 
+    /**
+     * Confirms that a task was marked as done.
+     *
+     * @param task the task in its new state.
+     */
     public void showMarked(Task task) {
         System.out.println("Nice! I've marked this task as done:");
         System.out.println("  " + task);
     }
 
+    /**
+     * Confirms that a task was marked as not done.
+     *
+     * @param task the task in its new state.
+     */
     public void showUnmarked(Task task) {
         System.out.println("OK, I've marked this task as not done yet:");
         System.out.println("  " + task);
     }
 
+    /** Stops reading input. */
     public void close() {
         scanner.close();
     }

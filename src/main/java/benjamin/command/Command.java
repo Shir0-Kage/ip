@@ -31,7 +31,9 @@ public abstract class Command {
      * Returns the list index for a one based task number, after checking it
      * against the tasks that are actually in the list.
      *
+     * @param taskNumber the one based position the user typed.
      * @param keyword the command word, used to word any problem message.
+     * @param tasks the list the number has to be valid for.
      * @throws BenjaminException if the list is empty or the number is out of range.
      */
     protected static int toIndex(int taskNumber, String keyword, TaskList tasks)

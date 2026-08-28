@@ -18,29 +18,54 @@ public class TaskList {
         this.tasks = new ArrayList<>();
     }
 
-    /** Creates a task list holding the given tasks, such as those just loaded from disk. */
+    /**
+     * Creates a task list holding the given tasks, such as those just loaded
+     * from the save file.
+     *
+     * @param tasks the tasks to start with, in the order they should appear.
+     */
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
     }
 
+    /** Returns how many tasks are in the list. */
     public int size() {
         return tasks.size();
     }
 
+    /**
+     * Returns the task at the given zero based index.
+     *
+     * @throws IndexOutOfBoundsException if there is no task at that index.
+     */
     public Task get(int index) {
         return tasks.get(index);
     }
 
+    /**
+     * Adds a task to the end of the list.
+     *
+     * @param task the task to add.
+     */
     public void add(Task task) {
         tasks.add(task);
     }
 
-    /** Removes and returns the task at the given zero based index. */
+    /**
+     * Removes and returns the task at the given zero based index.
+     *
+     * @throws IndexOutOfBoundsException if there is no task at that index.
+     */
     public Task remove(int index) {
         return tasks.remove(index);
     }
 
-    /** Returns the tasks that fall on the given date, in list order. */
+    /**
+     * Returns the tasks that fall on the given date, in list order.
+     *
+     * @param date the day being asked about.
+     * @return the matching tasks, which is empty if none fall on that day.
+     */
     public List<Task> findOn(LocalDate date) {
         List<Task> matches = new ArrayList<>();
 

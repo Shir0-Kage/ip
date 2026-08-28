@@ -91,6 +91,10 @@ public class TaskDateTime {
         return hasTime ? dateTime.format(STORAGE_DATE_TIME) : dateTime.format(STORAGE_DATE);
     }
 
+    /**
+     * Returns the form shown to the user, such as {@code Oct 15 2019} when no
+     * time was given, or {@code Dec 02 2019, 6:00pm} when one was.
+     */
     @Override
     public String toString() {
         if (!hasTime) {

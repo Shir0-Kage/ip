@@ -72,6 +72,12 @@ public class Benjamin {
         ui.close();
     }
 
+    /**
+     * Starts the chatbot, saving to {@code data/benjamin.txt} under whichever
+     * folder the program is run from.
+     *
+     * @param args not used.
+     */
     public static void main(String[] args) {
         new Benjamin("data", "benjamin.txt").run();
     }

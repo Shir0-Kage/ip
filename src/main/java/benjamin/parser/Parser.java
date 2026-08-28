@@ -134,6 +134,7 @@ public class Parser {
     /**
      * Returns the one based task number named by a command such as {@code mark 2}.
      *
+     * @param input the full line typed by the user.
      * @param keyword the command word, used both to find the number and to
      *     word any problem message.
      * @throws BenjaminException if the number is missing or is not a whole number.
