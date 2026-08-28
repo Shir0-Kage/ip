@@ -21,7 +21,7 @@ public class Benjamin {
 
         String divider = "____________________________________________________________";
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks = load();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -92,6 +92,50 @@ public class Benjamin {
         System.out.println(divider);
 
         scanner.close();
+    }
+
+    /**
+     * Reads the saved task list. A missing file simply means there is
+     * nothing saved yet, so an empty list is returned.
+     */
+    private static ArrayList<Task> load() {
+        ArrayList<Task> tasks = new ArrayList<>();
+
+        if (!Files.exists(DATA_FILE)) {
+            return tasks;
+        }
+
+        try {
+            for (String line : Files.readAllLines(DATA_FILE)) {
+                tasks.add(parseSavedTask(line));
+            }
+        } catch (IOException exception) {
+            System.out.println("OOPS!!! I could not read your saved tasks.");
+        }
+
+        return tasks;
+    }
+
+    /** Rebuilds a task from one line of the save file. */
+    private static Task parseSavedTask(String line) {
+        String[] parts = line.split(" \\| ");
+        String type = parts[0];
+        String description = parts[2];
+
+        Task task;
+        if (type.equals("D")) {
+            task = new Deadline(description, parts[3]);
+        } else if (type.equals("E")) {
+            task = new Event(description, parts[3], parts[4]);
+        } else {
+            task = new Todo(description);
+        }
+
+        if (parts[1].equals("1")) {
+            task.markAsDone();
+        }
+
+        return task;
     }
 
     /**
