@@ -1,4 +1,4 @@
-public enum Command {
+public enum CommandType {
     TODO,
     DEADLINE,
     EVENT,
@@ -10,7 +10,7 @@ public enum Command {
     BYE,
     UNKNOWN;
 
-    public static Command from(String input) {
+    public static CommandType from(String input) {
         String trimmedInput = input.trim();
 
         if (trimmedInput.isEmpty()) {
