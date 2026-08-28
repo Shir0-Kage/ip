@@ -5,8 +5,11 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    // A toolchain lets Gradle locate and use JDK 25 even when JAVA_HOME points
+    // at a different version, so the build does not depend on the environment.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 repositories {
@@ -37,7 +40,7 @@ test {
 }
 
 application {
-    mainClass = 'seedu.duke.Duke'
+    mainClass = 'benjamin.Benjamin'
 }
 
 jar {
@@ -48,7 +51,7 @@ jar {
 }
 
 shadowJar {
-    archiveFileName = 'duke.jar'
+    archiveFileName = 'benjamin.jar'
 }
 
 run {
