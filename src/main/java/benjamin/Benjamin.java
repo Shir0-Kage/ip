@@ -1,3 +1,11 @@
+package benjamin;
+
+import benjamin.command.Command;
+import benjamin.parser.Parser;
+import benjamin.storage.Storage;
+import benjamin.task.TaskList;
+import benjamin.ui.Ui;
+
 /**
  * A chatbot that keeps a list of todos, deadlines and events.
  *

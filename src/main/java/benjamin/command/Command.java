@@ -1,3 +1,10 @@
+package benjamin.command;
+
+import benjamin.BenjaminException;
+import benjamin.storage.Storage;
+import benjamin.task.TaskList;
+import benjamin.ui.Ui;
+
 /**
  * One instruction from the user, ready to be carried out.
  *

@@ -1,3 +1,11 @@
+package benjamin.command;
+
+import benjamin.BenjaminException;
+import benjamin.storage.Storage;
+import benjamin.task.Task;
+import benjamin.task.TaskList;
+import benjamin.ui.Ui;
+
 /** Adds one new task to the list. */
 public class AddCommand extends Command {
     private final Task task;
