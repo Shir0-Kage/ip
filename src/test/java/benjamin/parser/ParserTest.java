@@ -15,6 +15,7 @@ import benjamin.command.AddCommand;
 import benjamin.command.Command;
 import benjamin.command.DeleteCommand;
 import benjamin.command.ExitCommand;
+import benjamin.command.FindCommand;
 import benjamin.command.ListCommand;
 import benjamin.command.MarkCommand;
 import benjamin.command.OnCommand;
@@ -62,6 +63,33 @@ public class ParserTest {
     @Test
     public void parse_on_returnsOnCommand() throws BenjaminException {
         assertInstanceOf(OnCommand.class, Parser.parse("on 2019-10-15"));
+    }
+
+    @Test
+    public void parse_find_returnsFindCommand() throws BenjaminException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find book"));
+    }
+
+    @Test
+    public void parseKeyword_wordAfterFind_returnsIt() throws BenjaminException {
+        assertEquals("book", Parser.parseKeyword("find book"));
+    }
+
+    @Test
+    public void parseKeyword_severalWords_keepsThemAll() throws BenjaminException {
+        assertEquals("read book", Parser.parseKeyword("find read book"));
+    }
+
+    @Test
+    public void parseKeyword_extraSpaces_trimmedAway() throws BenjaminException {
+        assertEquals("book", Parser.parseKeyword("find    book   "));
+    }
+
+    @Test
+    public void parseKeyword_missingKeyword_exceptionThrown() {
+        BenjaminException exception = assertThrows(BenjaminException.class,
+                () -> Parser.parseKeyword("find"));
+        assertEquals("Please provide a keyword after find.", exception.getMessage());
     }
 
     @Test

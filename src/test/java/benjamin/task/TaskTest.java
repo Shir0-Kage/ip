@@ -74,6 +74,30 @@ public class TaskTest {
     }
 
     @Test
+    public void hasKeyword_wordInDescription_returnsTrue() {
+        assertTrue(new Todo("read book").hasKeyword("book"));
+    }
+
+    @Test
+    public void hasKeyword_differentCapitalisation_returnsTrue() {
+        assertTrue(new Todo("read book").hasKeyword("BOOK"));
+        assertTrue(new Todo("Read Book").hasKeyword("book"));
+    }
+
+    @Test
+    public void hasKeyword_wordNotInDescription_returnsFalse() {
+        assertFalse(new Todo("read book").hasKeyword("holiday"));
+    }
+
+    @Test
+    public void hasKeyword_matchesDescriptionOnly_ignoresTypeAndDate() throws BenjaminException {
+        Deadline deadline = new Deadline("return book", TaskDateTime.parse("2019-06-06"));
+
+        assertFalse(deadline.hasKeyword("Jun"));
+        assertTrue(deadline.hasKeyword("return"));
+    }
+
+    @Test
     public void occursOn_todo_neverMatches() {
         assertFalse(new Todo("read book").occursOn(LocalDate.of(2019, 6, 6)));
     }

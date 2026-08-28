@@ -5,6 +5,7 @@ public enum CommandType {
     DEADLINE,
     EVENT,
     LIST,
+    FIND,
     ON,
     MARK,
     UNMARK,

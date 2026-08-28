@@ -32,6 +32,18 @@ public class Task {
     }
 
     /**
+     * Returns true if the description contains the given text.
+     *
+     * <p>Capitalisation is ignored, so searching for {@code Book} finds a task
+     * described as {@code read book}.
+     *
+     * @param keyword the text being searched for.
+     */
+    public boolean hasKeyword(String keyword) {
+        return description.toLowerCase().contains(keyword.toLowerCase());
+    }
+
+    /**
      * Returns the line used to represent this task in the save file.
      * Subclasses prepend their own type letter.
      */
