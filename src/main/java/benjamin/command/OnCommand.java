@@ -1,4 +1,10 @@
+package benjamin.command;
+
 import java.time.LocalDate;
+
+import benjamin.storage.Storage;
+import benjamin.task.TaskList;
+import benjamin.ui.Ui;
 
 /** Shows the tasks that fall on one particular date. */
 public class OnCommand extends Command {

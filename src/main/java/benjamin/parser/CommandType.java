@@ -1,3 +1,5 @@
+package benjamin.parser;
+
 public enum CommandType {
     TODO,
     DEADLINE,

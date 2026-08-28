@@ -1,3 +1,11 @@
+package benjamin.command;
+
+import benjamin.BenjaminException;
+import benjamin.storage.Storage;
+import benjamin.task.Task;
+import benjamin.task.TaskList;
+import benjamin.ui.Ui;
+
 /** Removes one task from the list. */
 public class DeleteCommand extends Command {
     private final int taskNumber;

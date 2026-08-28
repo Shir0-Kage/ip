@@ -1,6 +1,12 @@
+package benjamin.ui;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
+
+import benjamin.task.Task;
+import benjamin.task.TaskDateTime;
+import benjamin.task.TaskList;
 
 /**
  * Deals with everything the user sees and types.
