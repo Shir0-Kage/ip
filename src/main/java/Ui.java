@@ -102,11 +102,6 @@ public class Ui {
         System.out.println("  " + task);
     }
 
-    /** Reports a save file line that could not be understood. */
-    public void showSkippedLine(int lineNumber, String reason) {
-        showError("Skipping line " + lineNumber + " of the save file because " + reason);
-    }
-
     public void close() {
         scanner.close();
     }

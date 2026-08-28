@@ -1,18 +1,22 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class Benjamin {
-    /** Where the task list is kept between runs, relative to the project root. */
-    private static final Path DATA_FILE = Paths.get("data", "benjamin.txt");
-
     private static final Ui ui = new Ui();
+    private static final Storage storage = new Storage("data", "benjamin.txt");
 
     public static void main(String[] args) {
-        TaskList tasks = new TaskList(load());
+        TaskList tasks;
+
+        try {
+            tasks = new TaskList(storage.load());
+
+            for (String warning : storage.getLoadWarnings()) {
+                ui.showError(warning);
+            }
+        } catch (BenjaminException exception) {
+            ui.showLoadingError();
+            tasks = new TaskList();
+        }
 
         ui.showWelcome();
 
@@ -83,121 +87,12 @@ public class Benjamin {
         ui.close();
     }
 
-    /**
-     * Reads the saved task list. A missing file simply means there is
-     * nothing saved yet, so an empty list is returned. Lines that are not in
-     * the expected format are reported and skipped, so one bad line does not
-     * cost the user the rest of the list.
-     */
-    private static ArrayList<Task> load() {
-        ArrayList<Task> tasks = new ArrayList<>();
-
-        if (!Files.exists(DATA_FILE)) {
-            return tasks;
-        }
-
-        try {
-            int lineNumber = 0;
-
-            for (String line : Files.readAllLines(DATA_FILE)) {
-                lineNumber++;
-
-                if (line.isBlank()) {
-                    continue;
-                }
-
-                try {
-                    tasks.add(parseSavedTask(line));
-                } catch (BenjaminException exception) {
-                    ui.showSkippedLine(lineNumber, exception.getMessage());
-                }
-            }
-        } catch (IOException exception) {
-            ui.showLoadingError();
-            return new ArrayList<>();
-        }
-
-        return tasks;
-    }
-
-    /**
-     * Rebuilds a task from one line of the save file.
-     *
-     * @throws BenjaminException if the line is not in the expected format.
-     */
-    private static Task parseSavedTask(String line) throws BenjaminException {
-        String[] parts = line.split(" \\| ", -1);
-
-        if (parts.length < 3) {
-            throw new BenjaminException("it does not have enough fields.");
-        }
-
-        String type = parts[0].trim();
-        String doneFlag = parts[1].trim();
-        String description = parts[2].trim();
-
-        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
-            throw new BenjaminException("the done marker should be 0 or 1.");
-        }
-        if (description.isEmpty()) {
-            throw new BenjaminException("the description is empty.");
-        }
-
-        Task task;
-        switch (type) {
-        case "T":
-            requireFieldCount(parts, 3);
-            task = new Todo(description);
-            break;
-        case "D":
-            requireFieldCount(parts, 4);
-            task = new Deadline(description,
-                    TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
-            break;
-        case "E":
-            requireFieldCount(parts, 5);
-            task = new Event(description,
-                    TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
-                    TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
-            break;
-        default:
-            throw new BenjaminException("\"" + type + "\" is not a known task type.");
-        }
-
-        if (doneFlag.equals("1")) {
-            task.markAsDone();
-        }
-
-        return task;
-    }
-
-    private static void requireFieldCount(String[] parts, int expected) throws BenjaminException {
-        if (parts.length != expected) {
-            throw new BenjaminException("type " + parts[0].trim() + " needs exactly "
-                    + expected + " fields but has " + parts.length + ".");
-        }
-    }
-
-    private static String requireNonBlank(String value, String fieldName) throws BenjaminException {
-        String trimmed = value.trim();
-
-        if (trimmed.isEmpty()) {
-            throw new BenjaminException(fieldName + " is empty.");
-        }
-
-        return trimmed;
-    }
-
-    /**
-     * Writes the whole task list to the save file, creating the data folder
-     * first if it is not there yet.
-     */
+    /** Writes the tasks to disk, reporting the problem if that is not possible. */
     private static void save(TaskList tasks) {
         try {
-            Files.createDirectories(DATA_FILE.getParent());
-            Files.write(DATA_FILE, tasks.toSaveFormat());
-        } catch (IOException exception) {
-            ui.showError("I could not save your tasks.");
+            storage.save(tasks);
+        } catch (BenjaminException exception) {
+            ui.showError(exception.getMessage());
         }
     }
 
