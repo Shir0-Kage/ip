@@ -1,7 +1,14 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Benjamin {
+    /** Where the task list is kept between runs, relative to the project root. */
+    private static final Path DATA_FILE = Paths.get("data", "benjamin.txt");
+
     public static void main(String[] args) {
         String banner = " ____             _                 _\n"
                 + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -14,7 +21,7 @@ public class Benjamin {
 
         String divider = "____________________________________________________________";
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks = load();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -43,12 +50,14 @@ public class Benjamin {
                     tasks.get(taskIndex).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(taskIndex));
+                    save(tasks);
                     break;
                 case UNMARK:
                     int unmarkTaskIndex = parseTaskIndex(input, "unmark", tasks.size());
                     tasks.get(unmarkTaskIndex).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + tasks.get(unmarkTaskIndex));
+                    save(tasks);
                     break;
                 case DELETE:
                     int deleteTaskIndex = parseTaskIndex(input, "delete", tasks.size());
@@ -56,12 +65,14 @@ public class Benjamin {
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removedTask);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+                    save(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
                     Task task = parseTask(input, command);
                     addTask(tasks, task);
+                    save(tasks);
                     break;
                 case UNKNOWN:
                     throw new BenjaminException("I'm sorry, but I don't know what that means :-(");
@@ -81,6 +92,130 @@ public class Benjamin {
         System.out.println(divider);
 
         scanner.close();
+    }
+
+    /**
+     * Reads the saved task list. A missing file simply means there is
+     * nothing saved yet, so an empty list is returned. Lines that are not in
+     * the expected format are reported and skipped, so one bad line does not
+     * cost the user the rest of the list.
+     */
+    private static ArrayList<Task> load() {
+        ArrayList<Task> tasks = new ArrayList<>();
+
+        if (!Files.exists(DATA_FILE)) {
+            return tasks;
+        }
+
+        try {
+            int lineNumber = 0;
+
+            for (String line : Files.readAllLines(DATA_FILE)) {
+                lineNumber++;
+
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                try {
+                    tasks.add(parseSavedTask(line));
+                } catch (BenjaminException exception) {
+                    System.out.println("OOPS!!! Skipping line " + lineNumber
+                            + " of the save file because " + exception.getMessage());
+                }
+            }
+        } catch (IOException exception) {
+            System.out.println("OOPS!!! I could not read your saved tasks, so I am starting empty.");
+            return new ArrayList<>();
+        }
+
+        return tasks;
+    }
+
+    /**
+     * Rebuilds a task from one line of the save file.
+     *
+     * @throws BenjaminException if the line is not in the expected format.
+     */
+    private static Task parseSavedTask(String line) throws BenjaminException {
+        String[] parts = line.split(" \\| ", -1);
+
+        if (parts.length < 3) {
+            throw new BenjaminException("it does not have enough fields.");
+        }
+
+        String type = parts[0].trim();
+        String doneFlag = parts[1].trim();
+        String description = parts[2].trim();
+
+        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
+            throw new BenjaminException("the done marker should be 0 or 1.");
+        }
+        if (description.isEmpty()) {
+            throw new BenjaminException("the description is empty.");
+        }
+
+        Task task;
+        switch (type) {
+        case "T":
+            requireFieldCount(parts, 3);
+            task = new Todo(description);
+            break;
+        case "D":
+            requireFieldCount(parts, 4);
+            task = new Deadline(description, requireNonBlank(parts[3], "the /by field"));
+            break;
+        case "E":
+            requireFieldCount(parts, 5);
+            task = new Event(description,
+                    requireNonBlank(parts[3], "the /from field"),
+                    requireNonBlank(parts[4], "the /to field"));
+            break;
+        default:
+            throw new BenjaminException("\"" + type + "\" is not a known task type.");
+        }
+
+        if (doneFlag.equals("1")) {
+            task.markAsDone();
+        }
+
+        return task;
+    }
+
+    private static void requireFieldCount(String[] parts, int expected) throws BenjaminException {
+        if (parts.length != expected) {
+            throw new BenjaminException("type " + parts[0].trim() + " needs exactly "
+                    + expected + " fields but has " + parts.length + ".");
+        }
+    }
+
+    private static String requireNonBlank(String value, String fieldName) throws BenjaminException {
+        String trimmed = value.trim();
+
+        if (trimmed.isEmpty()) {
+            throw new BenjaminException(fieldName + " is empty.");
+        }
+
+        return trimmed;
+    }
+
+    /**
+     * Writes the whole task list to the save file, creating the data folder
+     * first if it is not there yet.
+     */
+    private static void save(ArrayList<Task> tasks) {
+        try {
+            Files.createDirectories(DATA_FILE.getParent());
+
+            ArrayList<String> lines = new ArrayList<>();
+            for (Task task : tasks) {
+                lines.add(task.toSaveFormat());
+            }
+
+            Files.write(DATA_FILE, lines);
+        } catch (IOException exception) {
+            System.out.println("OOPS!!! I could not save your tasks.");
+        }
     }
 
     private static Task parseTask(String input, Command command) throws BenjaminException {
