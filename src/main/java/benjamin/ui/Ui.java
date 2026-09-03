@@ -150,8 +150,7 @@ public class Ui {
      * @param taskCount how many tasks there are now.
      */
     public void showAdded(Task task, int taskCount) {
-        print("Got it. I've added this task:");
-        print("  " + task);
+        print("Got it. I've added this task:", "  " + task);
         showTaskCount(taskCount);
     }
 
@@ -162,8 +161,7 @@ public class Ui {
      * @param taskCount how many tasks are left.
      */
     public void showRemoved(Task task, int taskCount) {
-        print("Noted. I've removed this task:");
-        print("  " + task);
+        print("Noted. I've removed this task:", "  " + task);
         showTaskCount(taskCount);
     }
 
@@ -173,8 +171,7 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showMarked(Task task) {
-        print("Nice! I've marked this task as done:");
-        print("  " + task);
+        print("Nice! I've marked this task as done:", "  " + task);
     }
 
     /**
@@ -183,8 +180,7 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showUnmarked(Task task) {
-        print("OK, I've marked this task as not done yet:");
-        print("  " + task);
+        print("OK, I've marked this task as not done yet:", "  " + task);
     }
 
     /** Stops reading input. */
@@ -202,7 +198,17 @@ public class Ui {
         print("Now you have " + taskCount + " tasks in the list.");
     }
 
-    private void print(String text) {
-        buffer.append(text).append(System.lineSeparator());
+    /**
+     * Adds one line per argument to the reply being built.
+     *
+     * <p>Taking a varargs list lets the callers that always show a fixed group
+     * of lines say so in a single call.
+     *
+     * @param lines the lines to show, in order.
+     */
+    private void print(String... lines) {
+        for (String line : lines) {
+            buffer.append(line).append(System.lineSeparator());
+        }
     }
 }
