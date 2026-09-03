@@ -12,11 +12,19 @@ import benjamin.ui.Ui;
  * <p>This class only wires the parts together. Reading and printing belongs to
  * {@link Ui}, understanding input to {@link Parser}, the tasks themselves to
  * {@link TaskList}, and the save file to {@link Storage}.
+ *
+ * <p>The same object drives both interfaces. {@link #run()} reads from the
+ * console, while {@link #getResponse(String)} answers one line at a time for
+ * the graphical interface.
  */
 public class Benjamin {
+    private static final String DATA_FOLDER = "data";
+    private static final String DATA_FILE = "benjamin.txt";
+
     private final Ui ui;
     private final Storage storage;
     private TaskList tasks;
+    private boolean isExit;
 
     /**
      * Creates a chatbot that saves to the given path, and loads whatever has
@@ -41,11 +49,15 @@ public class Benjamin {
         }
     }
 
+    /** Creates a chatbot that saves to the usual {@code data/benjamin.txt}. */
+    public Benjamin() {
+        this(DATA_FOLDER, DATA_FILE);
+    }
+
     /** Greets the user, then handles commands until there are none left. */
     public void run() {
         ui.showWelcome();
-
-        boolean isExit = false;
+        ui.flushToConsole();
 
         while (!isExit && ui.hasNextCommand()) {
             try {
@@ -59,6 +71,7 @@ public class Benjamin {
                 ui.showError(exception.getMessage());
             } finally {
                 ui.showLine();
+                ui.flushToConsole();
             }
         }
 
@@ -67,18 +80,56 @@ public class Benjamin {
             ui.showLine();
             ui.showFarewell();
             ui.showLine();
+            ui.flushToConsole();
         }
 
         ui.close();
     }
 
     /**
-     * Starts the chatbot, saving to {@code data/benjamin.txt} under whichever
-     * folder the program is run from.
+     * Returns the greeting shown when the graphical interface opens.
+     *
+     * <p>Any complaint about the save file is already waiting in the buffer, so
+     * it comes out ahead of the greeting just as it does in the text interface.
+     */
+    public String getWelcome() {
+        ui.showGreeting();
+
+        return ui.flush();
+    }
+
+    /**
+     * Returns the reply to one line of user input.
+     *
+     * <p>This runs exactly the same parsing and command code as the text
+     * interface, so both give the same answers.
+     *
+     * @param input the line the user typed.
+     */
+    public String getResponse(String input) {
+        try {
+            Command command = Parser.parse(input);
+            command.execute(tasks, ui, storage);
+            isExit = command.isExit();
+        } catch (BenjaminException exception) {
+            ui.showError(exception.getMessage());
+        }
+
+        return ui.flush();
+    }
+
+    /** Returns true once a bye command has been carried out. */
+    public boolean isExit() {
+        return isExit;
+    }
+
+    /**
+     * Starts the chatbot in text mode, saving to {@code data/benjamin.txt}
+     * under whichever folder the program is run from.
      *
      * @param args not used.
      */
     public static void main(String[] args) {
-        new Benjamin("data", "benjamin.txt").run();
+        new Benjamin().run();
     }
 }
