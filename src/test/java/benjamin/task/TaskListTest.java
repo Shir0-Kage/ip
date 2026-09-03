@@ -12,15 +12,26 @@ import benjamin.BenjaminException;
 
 public class TaskListTest {
     private static TaskList sampleList() throws BenjaminException {
-        TaskList tasks = new TaskList();
+        return TaskList.of(
+                new Todo("read book"),
+                new Deadline("return book", TaskDateTime.parse("2019-06-06")),
+                new Event("project meeting",
+                        TaskDateTime.parse("2019-08-06 1400"),
+                        TaskDateTime.parse("2019-08-08 1600")));
+    }
 
-        tasks.add(new Todo("read book"));
-        tasks.add(new Deadline("return book", TaskDateTime.parse("2019-06-06")));
-        tasks.add(new Event("project meeting",
-                TaskDateTime.parse("2019-08-06 1400"),
-                TaskDateTime.parse("2019-08-08 1600")));
+    @Test
+    public void of_severalTasks_keepsThemInTheOrderGiven() {
+        TaskList tasks = TaskList.of(new Todo("read book"), new Todo("join sports club"));
 
-        return tasks;
+        assertEquals(2, tasks.size());
+        assertEquals("[T][ ] read book", tasks.get(0).toString());
+        assertEquals("[T][ ] join sports club", tasks.get(1).toString());
+    }
+
+    @Test
+    public void of_noTasks_makesAnEmptyList() {
+        assertEquals(0, TaskList.of().size());
     }
 
     @Test

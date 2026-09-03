@@ -28,6 +28,24 @@ public class TaskList {
         this.tasks = tasks;
     }
 
+    /**
+     * Returns a task list holding the given tasks, in the order given.
+     *
+     * <p>A varargs factory keeps callers that know their tasks up front, such
+     * as tests, from having to build a list and add to it one call at a time.
+     *
+     * @param tasks the tasks to start with.
+     */
+    public static TaskList of(Task... tasks) {
+        TaskList taskList = new TaskList();
+
+        for (Task task : tasks) {
+            taskList.add(task);
+        }
+
+        return taskList;
+    }
+
     /** Returns how many tasks are in the list. */
     public int size() {
         return tasks.size();

@@ -25,10 +25,7 @@ public class CommandTest {
     }
 
     private static TaskList listOfOne() {
-        TaskList tasks = new TaskList();
-        tasks.add(new Todo("read book"));
-
-        return tasks;
+        return TaskList.of(new Todo("read book"));
     }
 
     @Test
