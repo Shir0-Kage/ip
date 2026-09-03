@@ -11,12 +11,15 @@ import benjamin.task.TaskList;
 /**
  * Deals with everything the user sees and types.
  *
- * <p>Keeping all reading and printing here means the rest of the program never
- * touches {@code System.in} or {@code System.out} directly, so the way the
- * chatbot talks can be changed in one place.
+ * <p>Replies are collected into a buffer rather than printed straight away.
+ * The text interface empties that buffer to the console after each command,
+ * while the graphical interface takes the same text and puts it in a dialog
+ * box. Both interfaces therefore show exactly the same wording.
  */
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
+
+    private static final String GREETING = "Hello! I'm Benjamin.\nWhat can I do for you?";
 
     private static final String BANNER = " ____             _                 _\n"
             + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -25,6 +28,7 @@ public class Ui {
             + "|____/ \\___|_| |_|/ |\\__,_|_| |_| |_|_|_| |_|\n"
             + "                |__/\n";
 
+    private final StringBuilder buffer = new StringBuilder();
     private final Scanner scanner;
 
     /** Creates a user interface that reads from standard input. */
@@ -42,19 +46,41 @@ public class Ui {
         return scanner.nextLine().trim();
     }
 
-    /** Prints the divider line used to separate replies. */
+    /**
+     * Returns everything shown since the last call and empties the buffer.
+     *
+     * @return the collected reply, which is empty if nothing was shown.
+     */
+    public String flush() {
+        String reply = buffer.toString();
+        buffer.setLength(0);
+
+        return reply;
+    }
+
+    /** Writes everything shown since the last call to the console. */
+    public void flushToConsole() {
+        System.out.print(flush());
+    }
+
+    /** Shows the divider line used to separate replies in the text interface. */
     public void showLine() {
-        System.out.println(DIVIDER);
+        print(DIVIDER);
     }
 
-    /** Prints the banner and the opening greeting. */
+    /** Shows the banner and the opening greeting, for the text interface. */
     public void showWelcome() {
-        System.out.println(BANNER + "Hello! I'm Benjamin.\nWhat can I do for you?\n" + DIVIDER);
+        print(BANNER + GREETING + "\n" + DIVIDER);
     }
 
-    /** Prints the sign off line. The surrounding dividers are printed by the caller. */
+    /** Shows the opening greeting without the banner, for the graphical interface. */
+    public void showGreeting() {
+        print(GREETING);
+    }
+
+    /** Shows the sign off line. The surrounding dividers are added by the caller. */
     public void showFarewell() {
-        System.out.println("Bye. Hope to see you again soon!");
+        print("Bye. Hope to see you again soon!");
     }
 
     /**
@@ -64,7 +90,7 @@ public class Ui {
      *     problem looks the same.
      */
     public void showError(String message) {
-        System.out.println("OOPS!!! " + message);
+        print("OOPS!!! " + message);
     }
 
     /** Reports that the save file could not be read at all. */
@@ -73,15 +99,15 @@ public class Ui {
     }
 
     /**
-     * Prints every task, numbered from one.
+     * Shows every task, numbered from one.
      *
      * @param tasks the list to show.
      */
     public void showTaskList(TaskList tasks) {
-        System.out.println("Here are the tasks in your list:");
+        print("Here are the tasks in your list:");
 
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.printf("%d.%s%n", i + 1, tasks.get(i));
+            print(String.format("%d.%s", i + 1, tasks.get(i)));
         }
     }
 
@@ -92,16 +118,14 @@ public class Ui {
      * @param matches the tasks falling on that day, possibly empty.
      */
     public void showTasksOn(LocalDate date, List<Task> matches) {
-        System.out.println("Here are the tasks on " + TaskDateTime.formatDate(date) + ":");
+        print("Here are the tasks on " + TaskDateTime.formatDate(date) + ":");
 
         if (matches.isEmpty()) {
-            System.out.println("There is nothing on that date.");
+            print("There is nothing on that date.");
             return;
         }
 
-        for (int i = 0; i < matches.size(); i++) {
-            System.out.printf("%d.%s%n", i + 1, matches.get(i));
-        }
+        showNumbered(matches);
     }
 
     /**
@@ -111,15 +135,12 @@ public class Ui {
      */
     public void showMatchingTasks(List<Task> matches) {
         if (matches.isEmpty()) {
-            System.out.println("There are no matching tasks in your list.");
+            print("There are no matching tasks in your list.");
             return;
         }
 
-        System.out.println("Here are the matching tasks in your list:");
-
-        for (int i = 0; i < matches.size(); i++) {
-            System.out.printf("%d.%s%n", i + 1, matches.get(i));
-        }
+        print("Here are the matching tasks in your list:");
+        showNumbered(matches);
     }
 
     /**
@@ -129,8 +150,8 @@ public class Ui {
      * @param taskCount how many tasks there are now.
      */
     public void showAdded(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
+        print("Got it. I've added this task:");
+        print("  " + task);
         showTaskCount(taskCount);
     }
 
@@ -141,8 +162,8 @@ public class Ui {
      * @param taskCount how many tasks are left.
      */
     public void showRemoved(Task task, int taskCount) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println("  " + task);
+        print("Noted. I've removed this task:");
+        print("  " + task);
         showTaskCount(taskCount);
     }
 
@@ -152,8 +173,8 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showMarked(Task task) {
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println("  " + task);
+        print("Nice! I've marked this task as done:");
+        print("  " + task);
     }
 
     /**
@@ -162,8 +183,8 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showUnmarked(Task task) {
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println("  " + task);
+        print("OK, I've marked this task as not done yet:");
+        print("  " + task);
     }
 
     /** Stops reading input. */
@@ -171,7 +192,17 @@ public class Ui {
         scanner.close();
     }
 
+    private void showNumbered(List<Task> tasks) {
+        for (int i = 0; i < tasks.size(); i++) {
+            print(String.format("%d.%s", i + 1, tasks.get(i)));
+        }
+    }
+
     private void showTaskCount(int taskCount) {
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+        print("Now you have " + taskCount + " tasks in the list.");
+    }
+
+    private void print(String text) {
+        buffer.append(text).append(System.lineSeparator());
     }
 }
