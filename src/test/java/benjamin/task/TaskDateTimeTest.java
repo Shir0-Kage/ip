@@ -48,8 +48,8 @@ public class TaskDateTimeTest {
 
     @Test
     public void parse_unknownWording_exceptionListsAcceptedFormats() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> TaskDateTime.parse("June 6th"));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> TaskDateTime.parse("June 6th"));
         assertTrue(exception.getMessage().contains("yyyy-MM-dd"));
     }
 

@@ -33,22 +33,22 @@ public class CommandTest {
 
     @Test
     public void execute_taskNumberAboveSize_exceptionNamesTheValidRange() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> new MarkCommand(2).execute(listOfOne(), new Ui(), storage()));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> new MarkCommand(2).execute(listOfOne(), new Ui(), storage()));
 
         assertEquals("Choose a task number between 1 and 1.", exception.getMessage());
     }
 
     @Test
     public void execute_taskNumberZero_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> new DeleteCommand(0).execute(listOfOne(), new Ui(), storage()));
+        assertThrows(
+                BenjaminException.class, () -> new DeleteCommand(0).execute(listOfOne(), new Ui(), storage()));
     }
 
     @Test
     public void execute_emptyList_exceptionNamesTheAction() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> new UnmarkCommand(1).execute(new TaskList(), new Ui(), storage()));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> new UnmarkCommand(1).execute(new TaskList(), new Ui(), storage()));
 
         assertEquals("There are no tasks to unmark.", exception.getMessage());
     }

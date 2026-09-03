@@ -87,15 +87,14 @@ public class ParserTest {
 
     @Test
     public void parseKeyword_missingKeyword_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseKeyword("find"));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> Parser.parseKeyword("find"));
         assertEquals("Please provide a keyword after find.", exception.getMessage());
     }
 
     @Test
     public void parse_unknownWord_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parse("blah"));
+        BenjaminException exception = assertThrows(BenjaminException.class, () -> Parser.parse("blah"));
         assertEquals("I'm sorry, but I don't know what that means :-(", exception.getMessage());
     }
 
@@ -119,8 +118,8 @@ public class ParserTest {
 
     @Test
     public void parseTask_todoWithoutDescription_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("todo", CommandType.TODO));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("todo", CommandType.TODO));
         assertEquals("The description of a todo cannot be empty.", exception.getMessage());
     }
 
@@ -139,27 +138,27 @@ public class ParserTest {
 
     @Test
     public void parseTask_deadlineWithoutBy_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("deadline return book", CommandType.DEADLINE));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("deadline return book", CommandType.DEADLINE));
         assertEquals("A deadline needs a /by date or time.", exception.getMessage());
     }
 
     @Test
     public void parseTask_deadlineWithEmptyBy_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("deadline return book /by", CommandType.DEADLINE));
+        assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("deadline return book /by", CommandType.DEADLINE));
     }
 
     @Test
     public void parseTask_deadlineWithoutDescription_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("deadline /by 2019-10-15", CommandType.DEADLINE));
+        assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("deadline /by 2019-10-15", CommandType.DEADLINE));
     }
 
     @Test
     public void parseTask_deadlineWithUnreadableDate_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("deadline return book /by June 6th", CommandType.DEADLINE));
+        assertThrows(BenjaminException.class, () ->
+                Parser.parseTask("deadline return book /by June 6th", CommandType.DEADLINE));
     }
 
     @Test
@@ -173,14 +172,14 @@ public class ParserTest {
 
     @Test
     public void parseTask_eventWithoutFrom_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("event camp /to 2019-08-08", CommandType.EVENT));
+        assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("event camp /to 2019-08-08", CommandType.EVENT));
     }
 
     @Test
     public void parseTask_eventWithoutTo_exceptionThrown() {
-        assertThrows(BenjaminException.class,
-                () -> Parser.parseTask("event camp /from 2019-08-06", CommandType.EVENT));
+        assertThrows(
+                BenjaminException.class, () -> Parser.parseTask("event camp /from 2019-08-06", CommandType.EVENT));
     }
 
     @Test
@@ -191,15 +190,15 @@ public class ParserTest {
 
     @Test
     public void parseTaskNumber_missingNumber_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseTaskNumber("mark", "mark"));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> Parser.parseTaskNumber("mark", "mark"));
         assertEquals("Please provide a task number after mark.", exception.getMessage());
     }
 
     @Test
     public void parseTaskNumber_notANumber_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseTaskNumber("mark abc", "mark"));
+        BenjaminException exception = assertThrows(
+                BenjaminException.class, () -> Parser.parseTaskNumber("mark abc", "mark"));
         assertEquals("The task number after mark must be a whole number.", exception.getMessage());
     }
 
@@ -215,8 +214,7 @@ public class ParserTest {
 
     @Test
     public void parseDate_missingDate_exceptionThrown() {
-        BenjaminException exception = assertThrows(BenjaminException.class,
-                () -> Parser.parseDate("on"));
+        BenjaminException exception = assertThrows(BenjaminException.class, () -> Parser.parseDate("on"));
         assertEquals("Please provide a date after on.", exception.getMessage());
     }
 
