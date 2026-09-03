@@ -54,26 +54,26 @@ public class Parser {
         CommandType commandType = CommandType.from(input);
 
         switch (commandType) {
-        case BYE:
-            return new ExitCommand();
-        case LIST:
-            return new ListCommand();
-        case FIND:
-            return new FindCommand(parseKeyword(input));
-        case ON:
-            return new OnCommand(parseDate(input));
-        case MARK:
-            return new MarkCommand(parseTaskNumber(input, KEYWORD_MARK));
-        case UNMARK:
-            return new UnmarkCommand(parseTaskNumber(input, KEYWORD_UNMARK));
-        case DELETE:
-            return new DeleteCommand(parseTaskNumber(input, KEYWORD_DELETE));
-        case TODO:
-        case DEADLINE:
-        case EVENT:
-            return new AddCommand(parseTask(input, commandType));
-        default:
-            throw new BenjaminException(MESSAGE_UNKNOWN_COMMAND);
+            case BYE:
+                return new ExitCommand();
+            case LIST:
+                return new ListCommand();
+            case FIND:
+                return new FindCommand(parseKeyword(input));
+            case ON:
+                return new OnCommand(parseDate(input));
+            case MARK:
+                return new MarkCommand(parseTaskNumber(input, KEYWORD_MARK));
+            case UNMARK:
+                return new UnmarkCommand(parseTaskNumber(input, KEYWORD_UNMARK));
+            case DELETE:
+                return new DeleteCommand(parseTaskNumber(input, KEYWORD_DELETE));
+            case TODO:
+            case DEADLINE:
+            case EVENT:
+                return new AddCommand(parseTask(input, commandType));
+            default:
+                throw new BenjaminException(MESSAGE_UNKNOWN_COMMAND);
         }
     }
 

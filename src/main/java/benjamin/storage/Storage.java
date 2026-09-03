@@ -127,23 +127,23 @@ public class Storage {
 
         Task task;
         switch (type) {
-        case "T":
-            requireFieldCount(parts, 3);
-            task = new Todo(description);
-            break;
-        case "D":
-            requireFieldCount(parts, 4);
-            task = new Deadline(description,
-                    TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
-            break;
-        case "E":
-            requireFieldCount(parts, 5);
-            task = new Event(description,
-                    TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
-                    TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
-            break;
-        default:
-            throw new BenjaminException("\"" + type + "\" is not a known task type.");
+            case "T":
+                requireFieldCount(parts, 3);
+                task = new Todo(description);
+                break;
+            case "D":
+                requireFieldCount(parts, 4);
+                task = new Deadline(description,
+                        TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
+                break;
+            case "E":
+                requireFieldCount(parts, 5);
+                task = new Event(description,
+                        TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
+                        TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
+                break;
+            default:
+                throw new BenjaminException("\"" + type + "\" is not a known task type.");
         }
 
         if (doneFlag.equals("1")) {
