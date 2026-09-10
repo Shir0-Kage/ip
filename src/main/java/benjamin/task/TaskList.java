@@ -96,15 +96,9 @@ public class TaskList {
      * @return the matching tasks, which is empty if none fall on that day.
      */
     public List<Task> findOn(LocalDate date) {
-        List<Task> matches = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.occursOn(date)) {
-                matches.add(task);
-            }
-        }
-
-        return matches;
+        return tasks.stream()
+                .filter(task -> task.occursOn(date))
+                .toList();
     }
 
     /**
@@ -114,25 +108,15 @@ public class TaskList {
      * @return the matching tasks, which is empty if none match.
      */
     public List<Task> find(String keyword) {
-        List<Task> matches = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.hasKeyword(keyword)) {
-                matches.add(task);
-            }
-        }
-
-        return matches;
+        return tasks.stream()
+                .filter(task -> task.hasKeyword(keyword))
+                .toList();
     }
 
     /** Returns one save file line per task, in list order. */
     public List<String> toSaveFormat() {
-        List<String> lines = new ArrayList<>();
-
-        for (Task task : tasks) {
-            lines.add(task.toSaveFormat());
-        }
-
-        return lines;
+        return tasks.stream()
+                .map(Task::toSaveFormat)
+                .toList();
     }
 }
