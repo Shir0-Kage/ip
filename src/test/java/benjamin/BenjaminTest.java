@@ -92,6 +92,71 @@ public class BenjaminTest {
     }
 
     @Test
+    public void getResponse_tagCommand_attachesAndShowsTheTag() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+
+        String reply = benjamin.getResponse("tag 1 #fun");
+
+        assertTrue(reply.contains("Nice, I've tagged this task:"));
+        assertTrue(reply.contains("[T][ ] read book #fun"));
+    }
+
+    @Test
+    public void getResponse_tagTwice_reportsItInsteadOfDuplicating() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+        benjamin.getResponse("tag 1 #fun");
+
+        String reply = benjamin.getResponse("tag 1 #FUN");
+
+        assertTrue(reply.contains("already tagged #fun"));
+        assertTrue(benjamin.getResponse("list").contains("[T][ ] read book #fun"));
+    }
+
+    @Test
+    public void getResponse_untagCommand_removesTheTag() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+        benjamin.getResponse("tag 1 #fun");
+
+        String reply = benjamin.getResponse("untag 1 #fun");
+
+        assertTrue(reply.contains("OK, I've removed that tag:"));
+        assertFalse(reply.contains("#fun"));
+    }
+
+    @Test
+    public void getResponse_untagMissingTag_reportsInsteadOfFailing() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+
+        assertTrue(benjamin.getResponse("untag 1 #nope").contains("not tagged #nope"));
+    }
+
+    @Test
+    public void getResponse_findByTag_matchesTaggedTasks() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+        benjamin.getResponse("todo join sports club");
+        benjamin.getResponse("tag 2 #fun");
+
+        String reply = benjamin.getResponse("find #fun");
+
+        assertTrue(reply.contains("join sports club"));
+        assertFalse(reply.contains("read book"));
+    }
+
+    @Test
+    public void getResponse_tagsAddedEarlier_surviveIntoANewChatbot() {
+        Benjamin benjamin = chatbot();
+        benjamin.getResponse("todo read book");
+        benjamin.getResponse("tag 1 #fun");
+
+        assertTrue(chatbot().getResponse("list").contains("[T][ ] read book #fun"));
+    }
+
+    @Test
     public void getResponse_tasksAddedEarlier_surviveIntoANewChatbot() {
         chatbot().getResponse("todo read book");
 

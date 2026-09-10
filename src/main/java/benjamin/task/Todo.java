@@ -17,12 +17,12 @@ public class Todo extends Task {
     /** Returns the save line, marked with the letter {@code T}. */
     @Override
     public String toSaveFormat() {
-        return TYPE_LETTER + " | " + super.toSaveFormat();
+        return TYPE_LETTER + " | " + super.toSaveFormat() + getTagsField();
     }
 
     /** Returns the todo as shown to the user, such as {@code [T][ ] read book}. */
     @Override
     public String toString() {
-        return "[T]" + super.toString();
+        return "[T]" + super.toString() + getTagSuffix();
     }
 }

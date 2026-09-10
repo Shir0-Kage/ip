@@ -22,6 +22,15 @@ import benjamin.task.Todo;
  * slashes in it, so the same code works on any operating system.
  */
 public class Storage {
+    /** Fields in a todo record before the optional tags field. */
+    private static final int TODO_FIELDS = 3;
+
+    /** Fields in a deadline record before the optional tags field. */
+    private static final int DEADLINE_FIELDS = 4;
+
+    /** Fields in an event record before the optional tags field. */
+    private static final int EVENT_FIELDS = 5;
+
     private final Path file;
     private final List<String> loadWarnings = new ArrayList<>();
 
@@ -129,18 +138,22 @@ public class Storage {
         }
 
         Task task;
+        int fieldsBeforeTags;
         switch (type) {
             case Todo.TYPE_LETTER:
-                requireFieldCount(parts, 3);
+                fieldsBeforeTags = TODO_FIELDS;
+                requireFieldCount(parts, fieldsBeforeTags);
                 task = new Todo(description);
                 break;
             case Deadline.TYPE_LETTER:
-                requireFieldCount(parts, 4);
+                fieldsBeforeTags = DEADLINE_FIELDS;
+                requireFieldCount(parts, fieldsBeforeTags);
                 task = new Deadline(description,
                         TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
                 break;
             case Event.TYPE_LETTER:
-                requireFieldCount(parts, 5);
+                fieldsBeforeTags = EVENT_FIELDS;
+                requireFieldCount(parts, fieldsBeforeTags);
                 task = new Event(description,
                         TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),
                         TaskDateTime.parse(requireNonBlank(parts[4], "the /to field")));
@@ -153,6 +166,10 @@ public class Storage {
         // here would mean a new task type was added without a matching arm.
         assert task != null : "a recognised record must produce a task";
 
+        if (parts.length > fieldsBeforeTags) {
+            applyTags(task, parts[fieldsBeforeTags]);
+        }
+
         if (doneFlag.equals("1")) {
             task.markAsDone();
         }
@@ -160,10 +177,42 @@ public class Storage {
         return task;
     }
 
-    private static void requireFieldCount(String[] parts, int expected) throws BenjaminException {
-        if (parts.length != expected) {
-            throw new BenjaminException("type " + parts[0].trim() + " needs exactly "
-                    + expected + " fields but has " + parts.length + ".");
+    /**
+     * Checks a record has the right number of fields for its type.
+     *
+     * <p>One extra field is allowed, and holds the tags. Records written before
+     * tagging existed simply do not have it, which is why the count is a choice
+     * of two rather than an exact match.
+     *
+     * @param fieldsBeforeTags how many fields the type needs without tags.
+     * @throws BenjaminException if the count is neither of the two allowed.
+     */
+    private static void requireFieldCount(String[] parts, int fieldsBeforeTags)
+            throws BenjaminException {
+        if (parts.length != fieldsBeforeTags && parts.length != fieldsBeforeTags + 1) {
+            throw new BenjaminException("type " + parts[0].trim() + " needs "
+                    + fieldsBeforeTags + " fields, or " + (fieldsBeforeTags + 1)
+                    + " with tags, but has " + parts.length + ".");
+        }
+    }
+
+    /**
+     * Attaches the tags held in a record's trailing field.
+     *
+     * <p>Tags are taken as they are found rather than validated. The field was
+     * already split on the record separator, so a stored tag cannot contain
+     * anything that would break the format, and a tag the app itself did not
+     * write is harmless.
+     */
+    private static void applyTags(Task task, String tagsField) {
+        String trimmed = tagsField.trim();
+
+        if (trimmed.isEmpty()) {
+            return;
+        }
+
+        for (String tag : trimmed.split("\\s+")) {
+            task.addTag(tag);
         }
     }
 

@@ -11,7 +11,9 @@ import benjamin.command.FindCommand;
 import benjamin.command.ListCommand;
 import benjamin.command.MarkCommand;
 import benjamin.command.OnCommand;
+import benjamin.command.TagCommand;
 import benjamin.command.UnmarkCommand;
+import benjamin.command.UntagCommand;
 import benjamin.task.Deadline;
 import benjamin.task.Event;
 import benjamin.task.Task;
@@ -33,6 +35,11 @@ public class Parser {
     private static final String KEYWORD_DELETE = "delete";
     private static final String KEYWORD_FIND = "find";
     private static final String KEYWORD_ON = "on";
+    private static final String KEYWORD_TAG = "tag";
+    private static final String KEYWORD_UNTAG = "untag";
+
+    /** What a tag may be made of, once its leading hash has been dropped. */
+    private static final String TAG_PATTERN = "[A-Za-z0-9_-]+";
 
     private static final String MARKER_BY = "/by";
     private static final String MARKER_FROM = "/from";
@@ -68,6 +75,10 @@ public class Parser {
                 return new UnmarkCommand(parseTaskNumber(input, KEYWORD_UNMARK));
             case DELETE:
                 return new DeleteCommand(parseTaskNumber(input, KEYWORD_DELETE));
+            case TAG:
+                return newTagCommand(input);
+            case UNTAG:
+                return newUntagCommand(input);
             case TODO:
             case DEADLINE:
             case EVENT:
@@ -153,6 +164,84 @@ public class Parser {
         }
 
         return TaskDateTime.parse(dateText).getDate();
+    }
+
+    /**
+     * The two things a tag or untag command names: which task, and which tag.
+     *
+     * @param taskNumber the one based position the user typed.
+     * @param tag the label, already stripped of any leading hash.
+     */
+    public record TagArguments(int taskNumber, String tag) { }
+
+    /**
+     * Returns the task number and tag named by a tag or untag command.
+     *
+     * @param input the full line typed by the user.
+     * @param keyword the command word, used to word any problem message.
+     * @throws BenjaminException if either part is missing or malformed.
+     */
+    public static TagArguments parseTagArguments(String input, String keyword)
+            throws BenjaminException {
+        String arguments = input.substring(keyword.length()).trim();
+
+        if (arguments.isEmpty()) {
+            throw new BenjaminException("Please provide a task number and a tag after "
+                    + keyword + ".");
+        }
+
+        String[] parts = arguments.split("\\s+", 2);
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(parts[0]);
+        } catch (NumberFormatException exception) {
+            throw new BenjaminException("The task number after " + keyword
+                    + " must be a whole number.");
+        }
+
+        if (parts.length < 2 || parts[1].isBlank()) {
+            throw new BenjaminException("Please provide a tag after the task number.");
+        }
+
+        return new TagArguments(taskNumber, requireValidTag(parts[1].trim()));
+    }
+
+    /**
+     * Returns the stored form of a tag the user typed, without its leading hash.
+     *
+     * @throws BenjaminException if the tag is empty, holds more than one tag,
+     *     or uses characters that would not survive the save file.
+     */
+    private static String requireValidTag(String tag) throws BenjaminException {
+        String withoutHash = tag.startsWith("#") ? tag.substring(1) : tag;
+
+        if (withoutHash.isEmpty()) {
+            throw new BenjaminException("A tag needs a name after the #.");
+        }
+        if (withoutHash.matches(".*\\s.*")) {
+            throw new BenjaminException("Please add one tag at a time.");
+        }
+        if (!withoutHash.matches(TAG_PATTERN)) {
+            throw new BenjaminException(
+                    "A tag can only contain letters, digits, hyphens and underscores.");
+        }
+
+        // Fold case here as well as in Task, so a message about an existing tag
+        // shows the same spelling the task list does.
+        return withoutHash.toLowerCase();
+    }
+
+    private static Command newTagCommand(String input) throws BenjaminException {
+        TagArguments arguments = parseTagArguments(input, KEYWORD_TAG);
+
+        return new TagCommand(arguments.taskNumber(), arguments.tag());
+    }
+
+    private static Command newUntagCommand(String input) throws BenjaminException {
+        TagArguments arguments = parseTagArguments(input, KEYWORD_UNTAG);
+
+        return new UntagCommand(arguments.taskNumber(), arguments.tag());
     }
 
     /** Returns the todo described by a {@code todo} command. */

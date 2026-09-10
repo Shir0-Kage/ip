@@ -41,12 +41,13 @@ public class Event extends Task {
     @Override
     public String toSaveFormat() {
         return TYPE_LETTER + " | " + super.toSaveFormat() + " | " + from.toStorageString()
-                + " | " + to.toStorageString();
+                + " | " + to.toStorageString() + getTagsField();
     }
 
     /** Returns the event as shown to the user, with both ends in brackets. */
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
+        return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")"
+                + getTagSuffix();
     }
 }
