@@ -49,6 +49,10 @@ dependencies {
 test {
     useJUnitPlatform()
 
+    // Assertions are off by default in Java, so they have to be switched on
+    // explicitly or the assert statements would never run.
+    jvmArgs '-ea'
+
     testLogging {
         events 'passed', 'skipped', 'failed'
 
@@ -77,4 +81,5 @@ shadowJar {
 
 run {
     standardInput = System.in
+    jvmArgs '-ea'
 }

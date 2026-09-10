@@ -54,6 +54,9 @@ public class Ui {
     public String flush() {
         String reply = buffer.toString();
         buffer.setLength(0);
+        // A leftover buffer would prepend this reply to the next one, which in
+        // the GUI shows up as an answer to the wrong question.
+        assert buffer.isEmpty() : "buffer must be empty after a flush";
 
         return reply;
     }

@@ -43,6 +43,10 @@ public class TaskDateTime {
     private final boolean hasTime;
 
     private TaskDateTime(LocalDateTime dateTime, boolean hasTime) {
+        // Only parse() constructs these, and it only does so from a value a
+        // formatter already accepted, so null cannot reach here.
+        assert dateTime != null : "a TaskDateTime must wrap a parsed date";
+
         this.dateTime = dateTime;
         this.hasTime = hasTime;
     }
