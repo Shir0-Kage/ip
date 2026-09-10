@@ -31,6 +31,12 @@ public enum CommandType {
     /** Mark a task as not done yet. */
     UNMARK,
 
+    /** Attach a label to a task. */
+    TAG,
+
+    /** Remove a label from a task. */
+    UNTAG,
+
     /** Remove a task from the list. */
     DELETE,
 

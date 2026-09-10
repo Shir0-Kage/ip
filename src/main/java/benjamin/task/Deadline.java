@@ -33,12 +33,13 @@ public class Deadline extends Task {
     /** Returns the save line, marked with the letter {@code D}. */
     @Override
     public String toSaveFormat() {
-        return TYPE_LETTER + " | " + super.toSaveFormat() + " | " + by.toStorageString();
+        return TYPE_LETTER + " | " + super.toSaveFormat() + " | " + by.toStorageString()
+                + getTagsField();
     }
 
     /** Returns the deadline as shown to the user, with its due date in brackets. */
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + by + ")";
+        return "[D]" + super.toString() + " (by: " + by + ")" + getTagSuffix();
     }
 }

@@ -183,6 +183,42 @@ public class Ui {
         print("OK, I've marked this task as not done yet:", "  " + task);
     }
 
+    /**
+     * Confirms that a label was attached.
+     *
+     * @param task the task with its new tag already shown.
+     */
+    public void showTagged(Task task) {
+        print("Nice, I've tagged this task:", "  " + task);
+    }
+
+    /**
+     * Confirms that a label was removed.
+     *
+     * @param task the task without that tag.
+     */
+    public void showUntagged(Task task) {
+        print("OK, I've removed that tag:", "  " + task);
+    }
+
+    /**
+     * Reports that the task already carried the label, so nothing changed.
+     *
+     * @param tag the label that was already there.
+     */
+    public void showAlreadyTagged(String tag) {
+        print("That task is already tagged #" + tag + ".");
+    }
+
+    /**
+     * Reports that the task did not carry the label, so nothing changed.
+     *
+     * @param tag the label that was not found.
+     */
+    public void showNotTagged(String tag) {
+        print("That task is not tagged #" + tag + ".");
+    }
+
     /** Stops reading input. */
     public void close() {
         scanner.close();
