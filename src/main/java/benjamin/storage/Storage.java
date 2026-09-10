@@ -45,6 +45,9 @@ public class Storage {
      */
     public ArrayList<Task> load() throws BenjaminException {
         loadWarnings.clear();
+        // Warnings are reported per load, so anything left from a previous call
+        // would be blamed on this file.
+        assert loadWarnings.isEmpty() : "warnings must not carry over between loads";
 
         ArrayList<Task> tasks = new ArrayList<>();
 
@@ -145,6 +148,10 @@ public class Storage {
             default:
                 throw new BenjaminException("\"" + type + "\" is not a known task type.");
         }
+
+        // Every arm of the switch either assigns a task or throws, so a null
+        // here would mean a new task type was added without a matching arm.
+        assert task != null : "a recognised record must produce a task";
 
         if (doneFlag.equals("1")) {
             task.markAsDone();

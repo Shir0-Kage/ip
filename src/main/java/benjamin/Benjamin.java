@@ -95,7 +95,12 @@ public class Benjamin {
     public String getWelcome() {
         ui.showGreeting();
 
-        return ui.flush();
+        String reply = ui.flush();
+        // The GUI puts this straight into a dialog box, so an empty reply would
+        // show the user a blank bubble with no explanation.
+        assert !reply.isEmpty() : "every command must produce something to show";
+
+        return reply;
     }
 
     /**

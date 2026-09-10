@@ -46,6 +46,12 @@ public abstract class Command {
                     + tasks.size() + ".");
         }
 
-        return taskNumber - 1;
+        int index = taskNumber - 1;
+        // Every subclass immediately calls tasks.get(index), so an off-by-one
+        // here would corrupt the wrong task rather than fail loudly.
+        assert index >= 0 && index < tasks.size()
+                : "index must be within the list once the range checks have passed";
+
+        return index;
     }
 }
