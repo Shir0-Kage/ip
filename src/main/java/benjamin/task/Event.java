@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 /** A task that runs from one point in time to another. */
 public class Event extends Task {
+    /** The letter that marks a event in the save file. */
+    public static final String TYPE_LETTER = "E";
+
     /** When the event starts. */
     protected TaskDateTime from;
 
@@ -37,7 +40,7 @@ public class Event extends Task {
     /** Returns the save line, marked with the letter {@code E}. */
     @Override
     public String toSaveFormat() {
-        return "E | " + super.toSaveFormat() + " | " + from.toStorageString()
+        return TYPE_LETTER + " | " + super.toSaveFormat() + " | " + from.toStorageString()
                 + " | " + to.toStorageString();
     }
 
