@@ -2,6 +2,7 @@ package benjamin.task;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +45,16 @@ public class TaskList {
         }
 
         return taskList;
+    }
+
+    /**
+     * Returns the tasks as a read-only list.
+     *
+     * <p>Callers that only need to walk the tasks, such as the user interface,
+     * can take this instead of the list itself, so they cannot change it.
+     */
+    public List<Task> asList() {
+        return Collections.unmodifiableList(tasks);
     }
 
     /** Returns how many tasks are in the list. */

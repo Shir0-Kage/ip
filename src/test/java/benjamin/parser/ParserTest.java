@@ -32,7 +32,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_mixedCaseKeyword_stillRecognised() throws BenjaminException {
+    public void parse_mixedCaseKeyword_stillRecognized() throws BenjaminException {
         assertInstanceOf(ExitCommand.class, Parser.parse("ByE"));
         assertInstanceOf(ListCommand.class, Parser.parse("LIST"));
     }
@@ -54,9 +54,17 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_taskNumberCommands_returnMatchingCommands() throws BenjaminException {
+    public void parse_mark_returnsMarkCommand() throws BenjaminException {
         assertInstanceOf(MarkCommand.class, Parser.parse("mark 1"));
+    }
+
+    @Test
+    public void parse_unmark_returnsUnmarkCommand() throws BenjaminException {
         assertInstanceOf(UnmarkCommand.class, Parser.parse("unmark 1"));
+    }
+
+    @Test
+    public void parse_delete_returnsDeleteCommand() throws BenjaminException {
         assertInstanceOf(DeleteCommand.class, Parser.parse("delete 1"));
     }
 
