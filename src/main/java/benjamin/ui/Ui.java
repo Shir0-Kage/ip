@@ -105,10 +105,7 @@ public class Ui {
      */
     public void showTaskList(TaskList tasks) {
         print("Here are the tasks in your list:");
-
-        for (int i = 0; i < tasks.size(); i++) {
-            print(String.format("%d.%s", i + 1, tasks.get(i)));
-        }
+        showNumbered(tasks.asList());
     }
 
     /**
@@ -195,7 +192,8 @@ public class Ui {
     }
 
     private void showTaskCount(int taskCount) {
-        print("Now you have " + taskCount + " tasks in the list.");
+        String noun = taskCount == 1 ? "task" : "tasks";
+        print("Now you have " + taskCount + " " + noun + " in the list.");
     }
 
     /**

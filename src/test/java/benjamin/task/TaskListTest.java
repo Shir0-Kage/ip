@@ -111,7 +111,7 @@ public class TaskListTest {
     }
 
     @Test
-    public void find_differentCapitalisation_stillFound() throws BenjaminException {
+    public void find_differentCapitalization_stillFound() throws BenjaminException {
         assertEquals(2, sampleList().find("BOOK").size());
         assertEquals(2, sampleList().find("BoOk").size());
     }

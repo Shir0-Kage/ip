@@ -79,7 +79,7 @@ public class TaskTest {
     }
 
     @Test
-    public void hasKeyword_differentCapitalisation_returnsTrue() {
+    public void hasKeyword_differentCapitalization_returnsTrue() {
         assertTrue(new Todo("read book").hasKeyword("BOOK"));
         assertTrue(new Todo("Read Book").hasKeyword("book"));
     }

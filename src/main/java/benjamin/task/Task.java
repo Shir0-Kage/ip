@@ -9,7 +9,7 @@ import java.time.LocalDate;
  * whether it is done. Subclasses add whatever else their kind of task needs,
  * such as a due date, and decide how the task is shown and saved.
  */
-public class Task {
+public abstract class Task {
     /** What the user wants to be reminded of. */
     protected String description;
 
@@ -21,7 +21,7 @@ public class Task {
      *
      * @param description what the user typed as the task description.
      */
-    public Task(String description) {
+    protected Task(String description) {
         this.description = description;
         this.isDone = false;
     }
@@ -58,7 +58,7 @@ public class Task {
     /**
      * Returns true if the description contains the given text.
      *
-     * <p>Capitalisation is ignored, so searching for {@code Book} finds a task
+     * <p>Capitalization is ignored, so searching for {@code Book} finds a task
      * described as {@code read book}.
      *
      * @param keyword the text being searched for.
