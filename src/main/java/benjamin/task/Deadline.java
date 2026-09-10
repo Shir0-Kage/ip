@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 /** A task that has to be finished by a particular date, and possibly a time. */
 public class Deadline extends Task {
+    /** The letter that marks a deadline in the save file. */
+    public static final String TYPE_LETTER = "D";
+
     /** When the task has to be finished by. */
     protected TaskDateTime by;
 
@@ -30,7 +33,7 @@ public class Deadline extends Task {
     /** Returns the save line, marked with the letter {@code D}. */
     @Override
     public String toSaveFormat() {
-        return "D | " + super.toSaveFormat() + " | " + by.toStorageString();
+        return TYPE_LETTER + " | " + super.toSaveFormat() + " | " + by.toStorageString();
     }
 
     /** Returns the deadline as shown to the user, with its due date in brackets. */

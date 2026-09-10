@@ -130,16 +130,16 @@ public class Storage {
 
         Task task;
         switch (type) {
-            case "T":
+            case Todo.TYPE_LETTER:
                 requireFieldCount(parts, 3);
                 task = new Todo(description);
                 break;
-            case "D":
+            case Deadline.TYPE_LETTER:
                 requireFieldCount(parts, 4);
                 task = new Deadline(description,
                         TaskDateTime.parse(requireNonBlank(parts[3], "the /by field")));
                 break;
-            case "E":
+            case Event.TYPE_LETTER:
                 requireFieldCount(parts, 5);
                 task = new Event(description,
                         TaskDateTime.parse(requireNonBlank(parts[3], "the /from field")),

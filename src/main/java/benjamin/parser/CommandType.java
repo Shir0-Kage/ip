@@ -43,7 +43,7 @@ public enum CommandType {
     /**
      * Returns the kind of command named by the first word of the input.
      *
-     * <p>Matching ignores capitalisation, so {@code BYE} and {@code bye} are
+     * <p>Matching ignores capitalization, so {@code BYE} and {@code bye} are
      * treated the same.
      *
      * @param input the full line typed by the user.
