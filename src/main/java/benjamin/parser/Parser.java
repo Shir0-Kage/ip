@@ -107,6 +107,10 @@ public class Parser {
      * @throws BenjaminException if the number is missing or is not a whole number.
      */
     public static int parseTaskNumber(String input, String keyword) throws BenjaminException {
+        // parse() routes here only after CommandType matched this keyword, so
+        // the input is always at least as long as the keyword itself.
+        assert input.length() >= keyword.length() : "input must start with its keyword";
+
         String taskNumberText = input.substring(keyword.length()).trim();
 
         if (taskNumberText.isEmpty()) {
