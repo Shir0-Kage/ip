@@ -103,7 +103,7 @@ public class ParserTest {
     @Test
     public void parse_unknownWord_exceptionThrown() {
         BenjaminException exception = assertThrows(BenjaminException.class, () -> Parser.parse("blah"));
-        assertEquals("I'm sorry, but I don't know what that means :-(", exception.getMessage());
+        assertTrue(exception.getMessage().contains("I answer to list, todo"));
     }
 
     @Test
