@@ -69,6 +69,27 @@ public abstract class Task {
     }
 
     /**
+     * Returns true if the other task describes the same thing as this one.
+     *
+     * <p>Only the type, description and dates are compared. Whether a task is
+     * done, and what it is tagged with, are not part of what makes it the same
+     * task, so marking one copy done would not stop it being a duplicate.
+     *
+     * @param other the task being compared against.
+     */
+    public boolean isDuplicateOf(Task other) {
+        return getClass() == other.getClass() && identity().equals(other.identity());
+    }
+
+    /**
+     * Returns the text that decides whether two tasks are the same thing.
+     * Dated task types append their dates.
+     */
+    protected String identity() {
+        return description.trim().toLowerCase();
+    }
+
+    /**
      * Attaches a label to this task.
      *
      * @param tag the label, with or without a leading hash.

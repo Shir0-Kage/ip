@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 import benjamin.BenjaminException;
@@ -20,14 +21,18 @@ public class TaskDateTime {
     public static final String ACCEPTED_FORMATS =
             "yyyy-MM-dd, yyyy-MM-dd HHmm, d/M/yyyy or d/M/yyyy HHmm";
 
+    // Parsing is strict so that a date which does not exist is rejected rather
+    // than quietly moved. Under the default lenient style, 2019-02-30 becomes
+    // 28 February without a word to the user. Strict resolution needs the
+    // proleptic-year symbol uuuu in place of yyyy, which is era dependent.
     private static final DateTimeFormatter[] DATE_TIME_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm", Locale.ENGLISH),
-        DateTimeFormatter.ofPattern("d/M/yyyy HHmm", Locale.ENGLISH),
+        strict("uuuu-MM-dd HHmm"),
+        strict("d/M/uuuu HHmm"),
     };
 
     private static final DateTimeFormatter[] DATE_FORMATS = {
-        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH),
-        DateTimeFormatter.ofPattern("d/M/yyyy", Locale.ENGLISH),
+        strict("uuuu-MM-dd"),
+        strict("d/M/uuuu"),
     };
 
     private static final DateTimeFormatter DISPLAY_DATE =
@@ -80,9 +85,24 @@ public class TaskDateTime {
                 + "\". Please use " + ACCEPTED_FORMATS + ".");
     }
 
+    /** Returns a formatter that rejects dates which do not exist on the calendar. */
+    private static DateTimeFormatter strict(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+                .withResolverStyle(ResolverStyle.STRICT);
+    }
+
     /** Returns the calendar date, ignoring any time of day. */
     public LocalDate getDate() {
         return dateTime.toLocalDate();
+    }
+
+    /**
+     * Returns true if this moment falls strictly after the given one.
+     *
+     * @param other the moment being compared against.
+     */
+    public boolean isAfter(TaskDateTime other) {
+        return dateTime.isAfter(other.dateTime);
     }
 
     /** Returns the display form of a plain calendar date, such as Oct 15 2019. */

@@ -26,6 +26,10 @@ public class AddCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws BenjaminException {
+        if (tasks.containsDuplicateOf(task)) {
+            throw new BenjaminException("You already have that exact task on the list.");
+        }
+
         tasks.add(task);
         ui.showAdded(task, tasks.size());
         storage.save(tasks);

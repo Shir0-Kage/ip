@@ -127,12 +127,49 @@ public class Parser {
         if (taskNumberText.isEmpty()) {
             throw new BenjaminException("Please provide a task number after " + keyword + ".");
         }
+        if (taskNumberText.matches(".*\\s.*")) {
+            throw new BenjaminException("Please give just one task number after " + keyword + ".");
+        }
 
         try {
             return Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
+            // Digits that still fail to parse can only mean the value overflows an
+            // int, which is a different complaint from "that is not a number".
+            if (taskNumberText.matches("-?\\d+")) {
+                throw new BenjaminException("That task number is far too large.");
+            }
+
             throw new BenjaminException("The task number after " + keyword
                     + " must be a whole number.");
+        }
+    }
+
+    /**
+     * Returns the description unchanged, provided it can survive a trip through
+     * the save file.
+     *
+     * @throws BenjaminException if it holds the character that separates saved fields.
+     */
+    private static String requireUsableDescription(String description) throws BenjaminException {
+        if (description.contains("|")) {
+            throw new BenjaminException("A description cannot contain the | character, "
+                    + "because that is what separates fields in the save file.");
+        }
+
+        return description;
+    }
+
+    /**
+     * Checks that a marker such as {@code /by} was given exactly once.
+     *
+     * @throws BenjaminException if it appears more than once.
+     */
+    private static void requireSingleMarker(String arguments, String marker)
+            throws BenjaminException {
+        if (arguments.indexOf(marker) != arguments.lastIndexOf(marker)) {
+            throw new BenjaminException("You gave " + marker + " more than once. "
+                    + "Please use it just once.");
         }
     }
 
@@ -252,12 +289,14 @@ public class Parser {
             throw new BenjaminException("The description of a todo cannot be empty.");
         }
 
-        return new Todo(description);
+        return new Todo(requireUsableDescription(description));
     }
 
     /** Returns the deadline described by a {@code deadline} command. */
     private static Task parseDeadline(String input) throws BenjaminException {
         String arguments = input.substring(KEYWORD_DEADLINE.length()).trim();
+        requireSingleMarker(arguments, MARKER_BY);
+
         int byIndex = arguments.indexOf(MARKER_BY);
 
         if (byIndex < 0) {
@@ -275,12 +314,15 @@ public class Parser {
                     + " date or time of a deadline cannot be empty.");
         }
 
-        return new Deadline(description, TaskDateTime.parse(by));
+        return new Deadline(requireUsableDescription(description), TaskDateTime.parse(by));
     }
 
     /** Returns the event described by an {@code event} command. */
     private static Task parseEvent(String input) throws BenjaminException {
         String arguments = input.substring(KEYWORD_EVENT.length()).trim();
+        requireSingleMarker(arguments, MARKER_FROM);
+        requireSingleMarker(arguments, MARKER_TO);
+
         int fromIndex = arguments.indexOf(MARKER_FROM);
 
         if (fromIndex < 0) {
@@ -309,6 +351,7 @@ public class Parser {
                     + " date or time of an event cannot be empty.");
         }
 
-        return new Event(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
+        return new Event(requireUsableDescription(description),
+                TaskDateTime.parse(from), TaskDateTime.parse(to));
     }
 }
