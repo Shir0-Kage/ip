@@ -1,71 +1,75 @@
 package benjamin.gui;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Circle;
+import javafx.scene.layout.Priority;
 
 /**
- * One line of the conversation: a picture beside the words that were said.
+ * One turn of the conversation.
  *
- * <p>The user's own messages are shown picture on the right, and the chatbot's
- * replies are flipped so that the two sides are easy to tell apart.
+ * <p>The two sides look deliberately different, because the conversation is
+ * not between two people. What the user typed appears as a short bubble on the
+ * right. Benjamin's replies fill the width on the left in a fixed-width font,
+ * so that numbered task lists line up instead of drifting. A complaint gets a
+ * style of its own again, so a mistake is never mistaken for an answer.
+ *
+ * <p>There are no profile pictures. The conversation only ever has the same
+ * two participants, so a picture on every line would spend width that the
+ * reply itself can use, on information the user already has.
  */
 public class DialogBox extends HBox {
-    private final Label text;
-    private final ImageView displayPicture;
+    /** How much of the window width one of the user's own bubbles may take. */
+    private static final double USER_WIDTH_FRACTION = 0.75;
 
-    private DialogBox(String message, Image picture) {
+    private final Label text;
+
+    private DialogBox(String message, Pos alignment, String styleClass) {
         text = new Label(message);
         text.setWrapText(true);
-        text.setPadding(new Insets(8));
+        text.getStyleClass().add(styleClass);
 
-        displayPicture = new ImageView(picture);
-        displayPicture.setFitWidth(48.0);
-        displayPicture.setFitHeight(48.0);
-        displayPicture.setClip(new Circle(24.0, 24.0, 24.0));
-
-        this.setAlignment(Pos.TOP_RIGHT);
-        this.setSpacing(8);
-        this.setPadding(new Insets(8));
-        this.getChildren().addAll(text, displayPicture);
+        this.setAlignment(alignment);
+        this.getChildren().add(text);
+        this.getStyleClass().add("dialog-row");
     }
 
     /**
-     * Returns a dialog box for something the user said, with the picture on the right.
+     * Returns a compact bubble on the right holding what the user typed.
      *
-     * @param message the words to show.
-     * @param picture the speaker's picture.
+     * @param message the command the user entered.
      */
-    public static DialogBox getUserDialog(String message, Image picture) {
-        return new DialogBox(message, picture);
+    public static DialogBox getUserDialog(String message) {
+        DialogBox box = new DialogBox(message, Pos.TOP_RIGHT, "user-bubble");
+        // Binding rather than fixing the width stops a long command spanning
+        // the window, while still letting the bubble shrink when it is resized.
+        box.text.maxWidthProperty().bind(box.widthProperty().multiply(USER_WIDTH_FRACTION));
+
+        return box;
     }
 
     /**
-     * Returns a dialog box for something the chatbot said, with the picture on the left.
+     * Returns a full width panel on the left holding one of Benjamin's replies.
      *
-     * @param message the words to show.
-     * @param picture the speaker's picture.
+     * @param message the reply to show.
      */
-    public static DialogBox getBenjaminDialog(String message, Image picture) {
-        DialogBox dialogBox = new DialogBox(message, picture);
-        dialogBox.flip();
-
-        return dialogBox;
+    public static DialogBox getBenjaminDialog(String message) {
+        return fillWidth(new DialogBox(message, Pos.TOP_LEFT, "bot-panel"));
     }
 
-    /** Puts the picture on the left and the words on the right. */
-    private void flip() {
-        this.setAlignment(Pos.TOP_LEFT);
+    /**
+     * Returns a panel styled to stand out, for a reply that reports a problem.
+     *
+     * @param message the complaint to show.
+     */
+    public static DialogBox getProblemDialog(String message) {
+        return fillWidth(new DialogBox(message, Pos.TOP_LEFT, "problem-panel"));
+    }
 
-        ObservableList<Node> children = FXCollections.observableArrayList(this.getChildren());
-        FXCollections.reverse(children);
-        this.getChildren().setAll(children);
+    private static DialogBox fillWidth(DialogBox box) {
+        box.text.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(box.text, Priority.ALWAYS);
+
+        return box;
     }
 }

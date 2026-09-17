@@ -5,8 +5,8 @@ import java.io.IOException;
 import benjamin.Benjamin;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 /**
@@ -19,12 +19,18 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
-            AnchorPane root = fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(
+                    Main.class.getResource("/view/benjamin.css").toExternalForm());
+
+            stage.setScene(scene);
             stage.setTitle("Benjamin");
-            stage.setMinHeight(600.0);
-            stage.setMinWidth(400.0);
+            // Small enough to sit beside other windows, but not so small that
+            // the input row and a reply cannot both be seen.
+            stage.setMinWidth(320.0);
+            stage.setMinHeight(400.0);
 
             fxmlLoader.<MainWindow>getController().setBenjamin(benjamin);
             stage.show();
