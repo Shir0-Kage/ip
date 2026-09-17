@@ -23,8 +23,8 @@ public class BenjaminTest {
     public void getWelcome_freshStart_greetsWithoutTheTextBanner() {
         String welcome = chatbot().getWelcome();
 
-        assertTrue(welcome.contains("Hello! I'm Benjamin."));
-        assertTrue(welcome.contains("What can I do for you?"));
+        assertTrue(welcome.contains("Benjamin."));
+        assertTrue(welcome.contains("I hold your list"));
         assertFalse(welcome.contains("____"));
     }
 
@@ -32,7 +32,7 @@ public class BenjaminTest {
     public void getResponse_addTask_confirmsTheTask() {
         String reply = chatbot().getResponse("todo read book");
 
-        assertTrue(reply.contains("Got it. I've added this task:"));
+        assertTrue(reply.contains("Fine. Added:"));
         assertTrue(reply.contains("[T][ ] read book"));
     }
 
@@ -40,7 +40,7 @@ public class BenjaminTest {
     public void getResponse_unknownCommand_reportsInsteadOfThrowing() {
         String reply = chatbot().getResponse("blah");
 
-        assertTrue(reply.contains("I don't know what that means"));
+        assertTrue(reply.contains("I answer to list, todo"));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class BenjaminTest {
         Benjamin benjamin = chatbot();
         String reply = benjamin.getResponse("bye");
 
-        assertTrue(reply.contains("Bye. Hope to see you again soon!"));
+        assertTrue(reply.contains("The list will keep."));
         assertTrue(benjamin.isExit());
     }
 
@@ -86,7 +86,7 @@ public class BenjaminTest {
 
         String reply = benjamin.getResponse("find book");
 
-        assertTrue(reply.contains("Here are the matching tasks in your list:"));
+        assertTrue(reply.contains("These match"));
         assertTrue(reply.contains("read book"));
         assertFalse(reply.contains("sports club"));
     }
@@ -98,7 +98,7 @@ public class BenjaminTest {
 
         String reply = benjamin.getResponse("tag 1 #fun");
 
-        assertTrue(reply.contains("Nice, I've tagged this task:"));
+        assertTrue(reply.contains("Tagged. Riveting:"));
         assertTrue(reply.contains("[T][ ] read book #fun"));
     }
 
@@ -122,7 +122,7 @@ public class BenjaminTest {
 
         String reply = benjamin.getResponse("untag 1 #fun");
 
-        assertTrue(reply.contains("OK, I've removed that tag:"));
+        assertTrue(reply.contains("Tag removed:"));
         assertFalse(reply.contains("#fun"));
     }
 
@@ -131,7 +131,7 @@ public class BenjaminTest {
         Benjamin benjamin = chatbot();
         benjamin.getResponse("todo read book");
 
-        assertTrue(benjamin.getResponse("untag 1 #nope").contains("not tagged #nope"));
+        assertTrue(benjamin.getResponse("untag 1 #nope").contains("never tagged #nope"));
     }
 
     @Test

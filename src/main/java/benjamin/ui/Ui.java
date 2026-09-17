@@ -15,11 +15,21 @@ import benjamin.task.TaskList;
  * The text interface empties that buffer to the console after each command,
  * while the graphical interface takes the same text and puts it in a dialog
  * box. Both interfaces therefore show exactly the same wording.
+ *
+ * <p>All of Benjamin's wording lives in this class, which is what gives him a
+ * consistent voice: unimpressed, faintly weary, and never actually unhelpful.
+ * Problem messages stay plainly factual on purpose, since a joke the user
+ * cannot act on is worse than no joke at all.
  */
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
 
-    private static final String GREETING = "Hello! I'm Benjamin.\nWhat can I do for you?";
+    private static final String GREETING = "Benjamin. I hold your list so you don't have to.\nGo on, then.";
+
+    private static final String FAREWELL = "Off you go. The list will keep.";
+
+    /** Marks a reply as a complaint, in the text interface. */
+    private static final String PROBLEM_PREFIX = "Hm. ";
 
     private static final String BANNER = " ____             _                 _\n"
             + "| __ )  ___ _ __ (_) __ _ _ __ ___ (_)_ __\n"
@@ -83,7 +93,7 @@ public class Ui {
 
     /** Shows the sign off line. The surrounding dividers are added by the caller. */
     public void showFarewell() {
-        print("Bye. Hope to see you again soon!");
+        print(FAREWELL);
     }
 
     /**
@@ -93,12 +103,13 @@ public class Ui {
      *     problem looks the same.
      */
     public void showError(String message) {
-        print("OOPS!!! " + message);
+        print(PROBLEM_PREFIX + message);
     }
 
     /** Reports that the save file could not be read at all. */
     public void showLoadingError() {
-        showError("I could not read your saved tasks, so I am starting empty.");
+        showError("I couldn't read your saved list, so we begin with nothing. "
+                + "A clean slate, if you want to look on the bright side.");
     }
 
     /**
@@ -107,7 +118,12 @@ public class Ui {
      * @param tasks the list to show.
      */
     public void showTaskList(TaskList tasks) {
-        print("Here are the tasks in your list:");
+        if (tasks.size() == 0) {
+            print("Your list is empty. Suspicious, but not my problem.");
+            return;
+        }
+
+        print("Here's what you've signed up for:");
         showNumbered(tasks.asList());
     }
 
@@ -118,28 +134,27 @@ public class Ui {
      * @param matches the tasks falling on that day, possibly empty.
      */
     public void showTasksOn(LocalDate date, List<Task> matches) {
-        print("Here are the tasks on " + TaskDateTime.formatDate(date) + ":");
-
         if (matches.isEmpty()) {
-            print("There is nothing on that date.");
+            print("Nothing on " + TaskDateTime.formatDate(date) + ". Enjoy it while it lasts.");
             return;
         }
 
+        print("On " + TaskDateTime.formatDate(date) + ", you have:");
         showNumbered(matches);
     }
 
     /**
      * Reports the tasks matching a search, or says that none do.
      *
-     * @param matches the tasks whose description contained the keyword.
+     * @param matches the tasks whose description or tags contained the keyword.
      */
     public void showMatchingTasks(List<Task> matches) {
         if (matches.isEmpty()) {
-            print("There are no matching tasks in your list.");
+            print("Nothing matches. Either it's done, or you imagined it.");
             return;
         }
 
-        print("Here are the matching tasks in your list:");
+        print("These match, for what it's worth:");
         showNumbered(matches);
     }
 
@@ -150,7 +165,7 @@ public class Ui {
      * @param taskCount how many tasks there are now.
      */
     public void showAdded(Task task, int taskCount) {
-        print("Got it. I've added this task:", "  " + task);
+        print("Fine. Added:", "  " + task);
         showTaskCount(taskCount);
     }
 
@@ -161,7 +176,7 @@ public class Ui {
      * @param taskCount how many tasks are left.
      */
     public void showRemoved(Task task, int taskCount) {
-        print("Noted. I've removed this task:", "  " + task);
+        print("Gone. I won't ask why:", "  " + task);
         showTaskCount(taskCount);
     }
 
@@ -171,7 +186,7 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showMarked(Task task) {
-        print("Nice! I've marked this task as done:", "  " + task);
+        print("Done, apparently:", "  " + task);
     }
 
     /**
@@ -180,7 +195,7 @@ public class Ui {
      * @param task the task in its new state.
      */
     public void showUnmarked(Task task) {
-        print("OK, I've marked this task as not done yet:", "  " + task);
+        print("Back on the pile:", "  " + task);
     }
 
     /**
@@ -189,7 +204,7 @@ public class Ui {
      * @param task the task with its new tag already shown.
      */
     public void showTagged(Task task) {
-        print("Nice, I've tagged this task:", "  " + task);
+        print("Tagged. Riveting:", "  " + task);
     }
 
     /**
@@ -198,7 +213,7 @@ public class Ui {
      * @param task the task without that tag.
      */
     public void showUntagged(Task task) {
-        print("OK, I've removed that tag:", "  " + task);
+        print("Tag removed:", "  " + task);
     }
 
     /**
@@ -207,7 +222,7 @@ public class Ui {
      * @param tag the label that was already there.
      */
     public void showAlreadyTagged(String tag) {
-        print("That task is already tagged #" + tag + ".");
+        print("It's already tagged #" + tag + ". Do try to keep up.");
     }
 
     /**
@@ -216,7 +231,7 @@ public class Ui {
      * @param tag the label that was not found.
      */
     public void showNotTagged(String tag) {
-        print("That task is not tagged #" + tag + ".");
+        print("It was never tagged #" + tag + ".");
     }
 
     /** Stops reading input. */
@@ -231,8 +246,8 @@ public class Ui {
     }
 
     private void showTaskCount(int taskCount) {
-        String noun = taskCount == 1 ? "task" : "tasks";
-        print("Now you have " + taskCount + " " + noun + " in the list.");
+        String noun = taskCount == 1 ? "thing" : "things";
+        print("That's " + taskCount + " " + noun + " on the list.");
     }
 
     /**
