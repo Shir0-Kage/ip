@@ -39,6 +39,9 @@ public class Ui {
             + "                |__/\n";
 
     private final StringBuilder buffer = new StringBuilder();
+
+    /** Whether the reply being built reported a problem. */
+    private boolean hadProblem;
     private final Scanner scanner;
 
     /** Creates a user interface that reads from standard input. */
@@ -64,6 +67,7 @@ public class Ui {
     public String flush() {
         String reply = buffer.toString();
         buffer.setLength(0);
+        hadProblem = false;
         // A leftover buffer would prepend this reply to the next one, which in
         // the GUI shows up as an answer to the wrong question.
         assert buffer.isEmpty() : "buffer must be empty after a flush";
@@ -103,7 +107,19 @@ public class Ui {
      *     problem looks the same.
      */
     public void showError(String message) {
+        hadProblem = true;
         print(PROBLEM_PREFIX + message);
+    }
+
+    /**
+     * Returns true if the reply being built reported a problem.
+     *
+     * <p>The graphical interface uses this to show complaints in their own
+     * style, so a mistake is not mistaken for an ordinary answer. Reading it
+     * has to happen before {@link #flush()}, which clears it.
+     */
+    public boolean hadProblem() {
+        return hadProblem;
     }
 
     /** Reports that the save file could not be read at all. */

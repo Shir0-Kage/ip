@@ -25,6 +25,7 @@ public class Benjamin {
     private final Storage storage;
     private TaskList tasks;
     private boolean isExit;
+    private boolean isLastReplyProblem;
 
     /**
      * Creates a chatbot that saves to the given path, and loads whatever has
@@ -95,6 +96,8 @@ public class Benjamin {
     public String getWelcome() {
         ui.showGreeting();
 
+        isLastReplyProblem = ui.hadProblem();
+
         String reply = ui.flush();
         // The GUI puts this straight into a dialog box, so an empty reply would
         // show the user a blank bubble with no explanation.
@@ -120,7 +123,20 @@ public class Benjamin {
             ui.showError(exception.getMessage());
         }
 
-        return ui.flush();
+        // Read before flushing, which clears the flag.
+        isLastReplyProblem = ui.hadProblem();
+
+        String reply = ui.flush();
+        // The GUI puts this straight into a dialog box, so an empty reply would
+        // show the user a blank bubble with no explanation.
+        assert !reply.isEmpty() : "every command must produce something to show";
+
+        return reply;
+    }
+
+    /** Returns true if the most recent reply reported a problem. */
+    public boolean isLastReplyProblem() {
+        return isLastReplyProblem;
     }
 
     /** Returns true once a bye command has been carried out. */
