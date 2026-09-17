@@ -30,6 +30,11 @@ public class Deadline extends Task {
         return by.getDate().equals(date);
     }
 
+    @Override
+    protected String identity() {
+        return super.identity() + " | " + by.toStorageString();
+    }
+
     /** Returns the save line, marked with the letter {@code D}. */
     @Override
     public String toSaveFormat() {

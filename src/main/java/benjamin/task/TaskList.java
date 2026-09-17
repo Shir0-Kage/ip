@@ -57,6 +57,15 @@ public class TaskList {
         return Collections.unmodifiableList(tasks);
     }
 
+    /**
+     * Returns true if the list already holds a task describing the same thing.
+     *
+     * @param task the task about to be added.
+     */
+    public boolean containsDuplicateOf(Task task) {
+        return tasks.stream().anyMatch(existing -> existing.isDuplicateOf(task));
+    }
+
     /** Returns how many tasks are in the list. */
     public int size() {
         return tasks.size();
